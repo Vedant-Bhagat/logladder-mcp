@@ -1,4 +1,4 @@
-# Owner: Vedant. Ask him before adding a dependency. Pin exact versions after the first successful install (V0).
+# Owner: Vedant. Ask him before adding a dependency. Versions pinned at V0 (mcp stays <2: FastMCP API).
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
@@ -10,16 +10,16 @@ description = "LogLadder: evidence-first MCP server over SereneDB for the Making
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-  "mcp",
-  "psycopg[binary]",
-  "pydantic",
-  "pyarrow",
-  "drain3",
-  "python-dotenv",
+  "mcp==1.30.0",
+  "psycopg[binary]==3.3.6",
+  "pydantic==2.14.1",
+  "pyarrow==26.0.0",
+  "drain3==0.9.11",
+  "python-dotenv==1.2.4",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "jsonschema>=4.18", "ruff"]
+dev = ["pytest==9.1.1", "jsonschema==4.26.0", "ruff==0.17.1"]
 
 [tool.setuptools.packages.find]
 include = ["loglad_mcp*"]

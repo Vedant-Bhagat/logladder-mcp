@@ -8,7 +8,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from scripts.validate_contracts import validate_envelope, validate_panel_event  # noqa: E402
+from scripts.validate_contracts import validate_envelope, validate_panel_event
 
 ENVELOPES = sorted((ROOT / "contracts/fixtures/envelopes").glob("*.json"))
 PANELS = sorted((ROOT / "contracts/fixtures/panel_events").glob("*.json"))

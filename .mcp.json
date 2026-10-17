@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "loglad": {
+      "command": "python",
+      "args": ["tasks.py", "mcp"]
+    }
+  }
+}
