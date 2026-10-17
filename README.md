@@ -12,7 +12,9 @@ Evidence-first log investigation for engineers, team leads and managers — an M
 4. `contracts/` — frozen interfaces and fixtures.
 
 ```bash
-python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\Activate.ps1
-pip install -e ".[dev]"
-pytest tests/contract                              # must pass on every branch
+python tasks.py setup            # .venv + pinned deps
+python tasks.py check            # contract + unit tests + ruff; must pass on every branch
+python tasks.py db               # SereneDB in Docker (needs Docker Desktop)
+python tasks.py data --sample    # load the 2k samples (full data: tasks.py fetch, then tasks.py data)
+claude                           # in the repo root; .mcp.json starts the `loglad` MCP server
 ```
