@@ -1,0 +1,94 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "event_id": "evt-0000002",
+  "ts": "2026-10-18T14:02:11Z",
+  "type": "evidence",
+  "role": "team_lead",
+  "payload": {
+    "kind": "table",
+    "title": "Recurring BGL problems, June 2005 (episodes)",
+    "receipt": {
+      "receipt_id": "R-0005",
+      "tool": "recurring_problems",
+      "sql": [
+        "SELECT e.template_id, t.template_text, … FROM episodes e JOIN templates t USING (template_id) WHERE …"
+      ],
+      "scope": {
+        "dataset": "bgl",
+        "from": "2005-06-01",
+        "to": "2005-06-30",
+        "filters": {},
+        "unit": "episodes",
+        "episode_gap": "10m",
+        "group_by": "template",
+        "bucket": null
+      },
+      "total_matches": null,
+      "returned": 2,
+      "truncated": true,
+      "runtime_ms": 42
+    },
+    "annotations": [],
+    "body": {
+      "columns": [
+        {
+          "key": "rank",
+          "label": "#",
+          "type": "int"
+        },
+        {
+          "key": "template_text",
+          "label": "Problem",
+          "type": "text"
+        },
+        {
+          "key": "team",
+          "label": "Team",
+          "type": "team"
+        },
+        {
+          "key": "episodes",
+          "label": "Episodes",
+          "type": "int"
+        },
+        {
+          "key": "lines",
+          "label": "Lines",
+          "type": "int"
+        },
+        {
+          "key": "max_level",
+          "label": "Max level",
+          "type": "level"
+        },
+        {
+          "key": "change_pct",
+          "label": "vs prev 30d",
+          "type": "change"
+        }
+      ],
+      "rows": [
+        {
+          "rank": 1,
+          "template_text": "data TLB error interrupt",
+          "team": "HPC Kernel & Runtime",
+          "episodes": 210,
+          "lines": 1284,
+          "max_level": "FATAL",
+          "change_pct": 121.1
+        },
+        {
+          "rank": 2,
+          "template_text": "ciod: failed to read message prefix …",
+          "team": "HPC Applications Support",
+          "episodes": 160,
+          "lines": 5400,
+          "max_level": "FATAL",
+          "change_pct": -5.9
+        }
+      ],
+      "total_row": null
+    }
+  }
+}

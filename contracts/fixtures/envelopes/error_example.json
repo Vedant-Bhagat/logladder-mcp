@@ -1,0 +1,29 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "receipt_id": "R-0009",
+  "tool": "search_logs",
+  "role": "engineer",
+  "summary": "Invalid input: 'to' is before 'from'.",
+  "scope": {
+    "dataset": "bgl",
+    "from": "2005-07-01",
+    "to": "2005-06-01",
+    "filters": {},
+    "unit": null,
+    "episode_gap": null,
+    "group_by": null,
+    "bucket": null
+  },
+  "total_matches": null,
+  "returned": 0,
+  "truncated": false,
+  "data": {},
+  "sql": [],
+  "runtime_ms": 0,
+  "caveats": [],
+  "error": {
+    "code": "invalid_input",
+    "message": "'to' (2005-06-01) is before 'from' (2005-07-01)."
+  }
+}

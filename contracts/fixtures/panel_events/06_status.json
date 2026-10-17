@@ -1,0 +1,17 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "event_id": "evt-0000006",
+  "ts": "2026-10-18T14:02:11Z",
+  "type": "status",
+  "role": "manager",
+  "payload": {
+    "receipt_count": 8,
+    "claims": {
+      "backed": 3,
+      "unbacked": 0,
+      "mismatched": 0,
+      "flagged": 1
+    }
+  }
+}

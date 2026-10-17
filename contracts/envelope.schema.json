@@ -1,0 +1,460 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://loglad.local/contracts/envelope.schema.json",
+  "title": "LogLadder tool envelope (contract v1)",
+  "description": "Every MCP tool in loglad_mcp returns exactly this object (as a dict). FROZEN: change only through the contract-change process in docs/specs/00-team-contract.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract", "receipt_id", "tool", "role", "summary", "scope", "total_matches", "returned", "truncated", "data", "sql", "runtime_ms", "caveats", "error"],
+  "properties": {
+    "contract": { "const": 1 },
+    "receipt_id": { "type": "string", "pattern": "^R-[0-9]{4,}$" },
+    "tool": { "$ref": "#/$defs/ToolName" },
+    "role": { "$ref": "#/$defs/Role" },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 400 },
+    "scope": { "$ref": "#/$defs/Scope" },
+    "total_matches": { "type": ["integer", "null"], "minimum": 0 },
+    "returned": { "type": "integer", "minimum": 0 },
+    "truncated": { "type": "boolean" },
+    "data": { "type": "object" },
+    "sql": { "type": "array", "items": { "type": "string" } },
+    "runtime_ms": { "type": "integer", "minimum": 0 },
+    "caveats": { "type": "array", "items": { "type": "string" } },
+    "error": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message"],
+          "properties": {
+            "code": { "enum": ["invalid_input", "db_error", "timeout", "not_found", "console_unavailable", "internal"] },
+            "message": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "fixture": { "type": "boolean", "description": "Only present (true) in contracts/fixtures. Real tool output never has this key." }
+  },
+  "allOf": [
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "describe_corpus" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/DescribeCorpusData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "search_logs" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/SearchLogsData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "get_timeline" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/TimelineData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "trace_request" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/TraceData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "count_by" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/CountByData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "trend" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/TrendData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "recurring_problems" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/RecurringData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "rank_risks" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/RiskData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "test_hypothesis" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/HypothesisData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "check_answer" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/CheckAnswerData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "verify_receipt" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/VerifyData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "const": "get_receipt" } } }, "then": { "properties": { "data": { "$ref": "#/$defs/GetReceiptData" } } } },
+    { "if": { "properties": { "error": { "type": "null" }, "tool": { "enum": ["show_evidence", "show_explainer"] } } }, "then": { "properties": { "data": { "$ref": "#/$defs/DisplayData" } } } }
+  ],
+  "$defs": {
+    "ToolName": {
+      "enum": ["describe_corpus", "search_logs", "get_timeline", "trace_request", "count_by", "trend", "recurring_problems", "rank_risks", "test_hypothesis", "check_answer", "verify_receipt", "get_receipt", "show_evidence", "show_explainer", "create_workspace_index", "drop_workspace_index"]
+    },
+    "Role": { "enum": ["engineer", "team_lead", "manager", "unknown"] },
+    "Dataset": { "enum": ["bgl", "openstack"] },
+    "DatasetScope": { "enum": ["bgl", "openstack", "both", "none"] },
+    "Level": { "type": "string", "description": "Upper-case level as logged: INFO, WARNING, SEVERE, ERROR, FATAL, FAILURE (BGL); INFO, WARNING, ERROR, CRITICAL, DEBUG, AUDIT (OpenStack)." },
+    "IsoTime": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2}(\\.[0-9]{1,6})?)?)?$" },
+    "Scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset", "from", "to", "filters"],
+      "properties": {
+        "dataset": { "$ref": "#/$defs/DatasetScope" },
+        "from": { "oneOf": [{ "$ref": "#/$defs/IsoTime" }, { "type": "null" }] },
+        "to": { "oneOf": [{ "$ref": "#/$defs/IsoTime" }, { "type": "null" }] },
+        "filters": { "type": "object" },
+        "unit": { "enum": ["lines", "episodes", null] },
+        "episode_gap": { "type": ["string", "null"], "description": "e.g. '10m' (BGL) or '60s' (OpenStack); set whenever episodes are used" },
+        "group_by": { "type": ["string", "null"] },
+        "bucket": { "enum": ["day", "week", null] }
+      }
+    },
+    "Highlight": { "type": "array", "prefixItems": [{ "type": "integer", "minimum": 0 }, { "type": "integer", "minimum": 0 }], "minItems": 2, "maxItems": 2, "description": "[start, end) CHARACTER offsets into message (not bytes)" },
+    "LogLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "dataset", "ts", "source", "component", "level", "message", "template_id", "episode_id", "highlights"],
+      "properties": {
+        "id": { "type": "integer" },
+        "dataset": { "$ref": "#/$defs/Dataset" },
+        "ts": { "$ref": "#/$defs/IsoTime" },
+        "source": { "type": "string", "description": "BGL: node; OpenStack: service" },
+        "component": { "type": ["string", "null"], "description": "BGL: component; OpenStack: service" },
+        "level": { "$ref": "#/$defs/Level" },
+        "message": { "type": "string", "maxLength": 401, "description": "Truncated to 400 chars + '…' when longer" },
+        "template_id": { "type": ["integer", "null"] },
+        "episode_id": { "type": ["integer", "null"] },
+        "highlights": { "type": "array", "items": { "$ref": "#/$defs/Highlight" } },
+        "repeat_count": { "type": "integer", "minimum": 1 },
+        "extra": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "alert_category": { "type": ["string", "null"] },
+            "midplane": { "type": ["string", "null"] },
+            "request_id": { "type": ["string", "null"] },
+            "instance_id": { "type": ["string", "null"] },
+            "http_status": { "type": ["integer", "null"] },
+            "latency_s": { "type": ["number", "null"] },
+            "labelled_anomaly": { "type": ["boolean", "null"] }
+          }
+        }
+      }
+    },
+    "DescribeCorpusData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["datasets", "ownership_unmapped_rows", "notes"],
+      "properties": {
+        "datasets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["dataset", "rows", "from", "to", "components", "levels", "templates", "episodes", "episode_gap"],
+            "properties": {
+              "dataset": { "$ref": "#/$defs/Dataset" },
+              "rows": { "type": "integer" },
+              "from": { "$ref": "#/$defs/IsoTime" },
+              "to": { "$ref": "#/$defs/IsoTime" },
+              "components": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["name", "team", "rows"], "properties": { "name": { "type": "string" }, "team": { "type": "string" }, "rows": { "type": "integer" } } } },
+              "levels": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["name", "rows"], "properties": { "name": { "type": "string" }, "rows": { "type": "integer" } } } },
+              "templates": { "type": "integer" },
+              "episodes": { "type": "integer" },
+              "episode_gap": { "type": "string" },
+              "labelled_rows": { "type": "integer", "description": "BGL rows with an alert label / OpenStack rows of labelled anomalous instances" }
+            }
+          }
+        },
+        "ownership_unmapped_rows": { "type": "integer" },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "SearchLogsData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query", "match", "lines"],
+      "properties": {
+        "query": { "type": "string" },
+        "match": { "enum": ["terms", "phrase", "fuzzy"] },
+        "lines": { "type": "array", "maxItems": 50, "items": { "$ref": "#/$defs/LogLine" } }
+      }
+    },
+    "TimelineGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["template_id", "template_text", "level", "count", "first_ts", "last_ts", "sample"],
+      "properties": {
+        "template_id": { "type": ["integer", "null"] },
+        "template_text": { "type": "string" },
+        "level": { "$ref": "#/$defs/Level" },
+        "count": { "type": "integer", "minimum": 1 },
+        "first_ts": { "$ref": "#/$defs/IsoTime" },
+        "last_ts": { "$ref": "#/$defs/IsoTime" },
+        "sample": { "$ref": "#/$defs/LogLine" }
+      }
+    },
+    "TimelineData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anchor", "window", "before", "after"],
+      "properties": {
+        "anchor": { "oneOf": [{ "$ref": "#/$defs/LogLine" }, { "type": "null" }] },
+        "window": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["before_s", "after_s", "scope", "scope_value"],
+          "properties": {
+            "before_s": { "type": "integer" },
+            "after_s": { "type": "integer" },
+            "scope": { "enum": ["node", "midplane", "service", "instance", "dataset"] },
+            "scope_value": { "type": ["string", "null"] }
+          }
+        },
+        "before": { "type": "array", "maxItems": 40, "items": { "$ref": "#/$defs/TimelineGroup" } },
+        "after": { "type": "array", "maxItems": 40, "items": { "$ref": "#/$defs/TimelineGroup" } }
+      }
+    },
+    "TraceData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request_id", "instance_id", "hops", "outcome", "labelled_anomaly", "lines"],
+      "properties": {
+        "request_id": { "type": ["string", "null"] },
+        "instance_id": { "type": ["string", "null"] },
+        "hops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["service", "first_ts", "last_ts", "lines", "max_level", "gap_from_prev_s"],
+            "properties": {
+              "service": { "type": "string" },
+              "first_ts": { "$ref": "#/$defs/IsoTime" },
+              "last_ts": { "$ref": "#/$defs/IsoTime" },
+              "lines": { "type": "integer" },
+              "max_level": { "$ref": "#/$defs/Level" },
+              "gap_from_prev_s": { "type": ["number", "null"] }
+            }
+          }
+        },
+        "outcome": { "type": ["string", "null"], "description": "Last ERROR/CRITICAL template text if any, else null. Never invented." },
+        "labelled_anomaly": { "type": ["boolean", "null"] },
+        "lines": { "type": "array", "maxItems": 50, "items": { "$ref": "#/$defs/LogLine" } }
+      }
+    },
+    "CountByData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group_by", "unit", "rows", "other", "total"],
+      "properties": {
+        "group_by": { "enum": ["component", "team", "level", "template", "alert_category", "service", "http_status", "dataset", "midplane"] },
+        "unit": { "enum": ["lines", "episodes"] },
+        "rows": {
+          "type": "array",
+          "maxItems": 25,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["key", "label", "count", "share"],
+            "properties": {
+              "key": { "type": ["string", "integer", "null"] },
+              "label": { "type": "string" },
+              "count": { "type": "integer" },
+              "share": { "type": "number", "minimum": 0, "maximum": 1 },
+              "team": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "other": { "oneOf": [{ "type": "null" }, { "type": "object", "additionalProperties": false, "required": ["count", "share", "groups"], "properties": { "count": { "type": "integer" }, "share": { "type": "number" }, "groups": { "type": "integer" } } }] },
+        "total": { "type": "integer" }
+      }
+    },
+    "TrendData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "bucket", "unit_label", "series", "change"],
+      "properties": {
+        "metric": { "enum": ["lines", "episodes", "error_rate", "latency_p95"] },
+        "bucket": { "enum": ["day", "week"] },
+        "unit_label": { "type": "string" },
+        "series": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "points"],
+            "properties": {
+              "name": { "type": "string" },
+              "points": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["t", "v"], "properties": { "t": { "$ref": "#/$defs/IsoTime" }, "v": { "type": ["number", "null"] } } } }
+            }
+          }
+        },
+        "change": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "first_half", "second_half", "slope_per_bucket", "last_vs_prev_pct"],
+            "properties": {
+              "name": { "type": "string" },
+              "first_half": { "type": "number" },
+              "second_half": { "type": "number" },
+              "slope_per_bucket": { "type": "number" },
+              "last_vs_prev_pct": { "type": ["number", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "RecurringData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 25,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rank", "template_id", "template_text", "dataset", "component", "team", "episodes", "lines", "distinct_scopes", "max_level", "prev_episodes", "change_pct"],
+            "properties": {
+              "rank": { "type": "integer", "minimum": 1 },
+              "template_id": { "type": "integer" },
+              "template_text": { "type": "string" },
+              "dataset": { "$ref": "#/$defs/Dataset" },
+              "component": { "type": ["string", "null"] },
+              "team": { "type": "string" },
+              "episodes": { "type": "integer" },
+              "lines": { "type": "integer" },
+              "distinct_scopes": { "type": "integer", "description": "distinct midplanes (BGL) or instances (OpenStack)" },
+              "max_level": { "$ref": "#/$defs/Level" },
+              "prev_episodes": { "type": ["integer", "null"] },
+              "change_pct": { "type": ["number", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "RiskInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["F", "S", "T", "V", "L"],
+      "properties": { "F": { "type": "number", "minimum": 0, "maximum": 1 }, "S": { "type": "number", "minimum": 0, "maximum": 1 }, "T": { "type": "number", "minimum": 0, "maximum": 1 }, "V": { "type": "number", "minimum": 0, "maximum": 1 }, "L": { "type": "number", "minimum": 0, "maximum": 1 } }
+    },
+    "RiskData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weights", "items"],
+      "properties": {
+        "weights": { "$ref": "#/$defs/RiskInputs" },
+        "items": {
+          "type": "array",
+          "maxItems": 25,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rank", "template_id", "title", "dataset", "team", "score", "inputs", "raw", "stability_top3"],
+            "properties": {
+              "rank": { "type": "integer", "minimum": 1 },
+              "template_id": { "type": "integer" },
+              "title": { "type": "string" },
+              "dataset": { "$ref": "#/$defs/Dataset" },
+              "team": { "type": "string" },
+              "score": { "type": "number", "minimum": 0, "maximum": 100 },
+              "inputs": { "$ref": "#/$defs/RiskInputs" },
+              "raw": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["episodes", "distinct_scopes", "first_half_episodes", "second_half_episodes", "max_level", "labelled_share"],
+                "properties": {
+                  "episodes": { "type": "integer" },
+                  "distinct_scopes": { "type": "integer" },
+                  "first_half_episodes": { "type": "integer" },
+                  "second_half_episodes": { "type": "integer" },
+                  "max_level": { "$ref": "#/$defs/Level" },
+                  "labelled_share": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              },
+              "stability_top3": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        }
+      }
+    },
+    "HypothesisSide": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["support", "baseline", "lift"],
+      "properties": { "support": { "type": ["number", "null"] }, "baseline": { "type": ["number", "null"] }, "lift": { "type": ["number", "null"] } }
+    },
+    "HypothesisData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cause", "effect", "window_s", "scope", "effect_episodes", "supported_episodes", "baseline_windows", "baseline_hits", "forward", "reverse", "examples", "counter_examples", "verdict"],
+      "properties": {
+        "cause": { "type": "object" },
+        "effect": { "type": "object" },
+        "window_s": { "type": "integer" },
+        "scope": { "enum": ["midplane", "node", "service", "instance"] },
+        "effect_episodes": { "type": "integer" },
+        "supported_episodes": { "type": "integer" },
+        "baseline_windows": { "type": "integer" },
+        "baseline_hits": { "type": "integer" },
+        "forward": { "$ref": "#/$defs/HypothesisSide" },
+        "reverse": { "$ref": "#/$defs/HypothesisSide" },
+        "examples": { "type": "array", "maxItems": 3, "items": { "type": "object" } },
+        "counter_examples": { "type": "array", "maxItems": 3, "items": { "type": "object" } },
+        "verdict": { "enum": ["strong", "moderate", "weak", "none", "insufficient_data"] }
+      }
+    },
+    "CheckAnswerData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "counts", "claims"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["backed", "unbacked", "mismatched", "flagged"],
+          "properties": { "backed": { "type": "integer" }, "unbacked": { "type": "integer" }, "mismatched": { "type": "integer" }, "flagged": { "type": "integer" } }
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text", "kind", "status", "receipt_ids", "note"],
+            "properties": {
+              "text": { "type": "string" },
+              "kind": { "enum": ["number", "percent", "date", "causal_word", "impact_word"] },
+              "status": { "enum": ["backed", "unbacked", "mismatched", "flagged"] },
+              "receipt_ids": { "type": "array", "items": { "type": "string" } },
+              "note": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "VerifyData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "match", "original_digest", "new_digest", "original_runtime_ms", "new_runtime_ms"],
+      "properties": {
+        "receipt_id": { "type": "string" },
+        "match": { "type": "boolean" },
+        "original_digest": { "type": "string" },
+        "new_digest": { "type": "string" },
+        "original_runtime_ms": { "type": "integer" },
+        "new_runtime_ms": { "type": "integer" }
+      }
+    },
+    "ReceiptRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "created_at", "session_id", "tool", "role", "params", "sql", "scope", "total_matches", "returned", "truncated", "runtime_ms", "result_digest", "data", "error"],
+      "properties": {
+        "receipt_id": { "type": "string" },
+        "created_at": { "$ref": "#/$defs/IsoTime" },
+        "session_id": { "type": "string" },
+        "tool": { "$ref": "#/$defs/ToolName" },
+        "role": { "$ref": "#/$defs/Role" },
+        "params": { "type": "object" },
+        "sql": { "type": "array", "items": { "type": "string" } },
+        "scope": { "$ref": "#/$defs/Scope" },
+        "total_matches": { "type": ["integer", "null"] },
+        "returned": { "type": "integer" },
+        "truncated": { "type": "boolean" },
+        "runtime_ms": { "type": "integer" },
+        "result_digest": { "type": "string" },
+        "data": { "type": "object" },
+        "error": { "type": ["string", "null"] }
+      }
+    },
+    "GetReceiptData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt"],
+      "properties": { "receipt": { "$ref": "#/$defs/ReceiptRecord" } }
+    },
+    "DisplayData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["delivered", "panel", "event_id"],
+      "properties": {
+        "delivered": { "type": "boolean" },
+        "panel": { "enum": ["evidence", "explainer"] },
+        "event_id": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

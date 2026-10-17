@@ -1,0 +1,9 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "event_id": "evt-0000007",
+  "ts": "2026-10-18T14:02:11Z",
+  "type": "reset",
+  "role": "unknown",
+  "payload": {}
+}

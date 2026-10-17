@@ -1,0 +1,162 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "receipt_id": "R-0002",
+  "tool": "get_timeline",
+  "role": "engineer",
+  "summary": "Around line 1201 on midplane R23-M0: 2 distinct event types in the 10 minutes before and 2 in the 5 minutes after.",
+  "scope": {
+    "dataset": "bgl",
+    "from": "2005-06-14T09:02:03",
+    "to": "2005-06-14T09:17:03",
+    "filters": {
+      "midplane": "R23-M0"
+    },
+    "unit": "lines",
+    "episode_gap": null,
+    "group_by": null,
+    "bucket": null
+  },
+  "total_matches": 316,
+  "returned": 4,
+  "truncated": false,
+  "data": {
+    "anchor": {
+      "id": 1201,
+      "dataset": "bgl",
+      "ts": "2005-06-14T09:12:03.512345",
+      "source": "R23-M0-NE-C:J05-U01",
+      "component": "KERNEL",
+      "level": "FATAL",
+      "message": "data TLB error interrupt",
+      "template_id": 42,
+      "episode_id": 9001,
+      "highlights": [
+        [
+          5,
+          8
+        ]
+      ],
+      "extra": {
+        "alert_category": "KERNDTLB",
+        "midplane": "R23-M0"
+      }
+    },
+    "window": {
+      "before_s": 600,
+      "after_s": 300,
+      "scope": "midplane",
+      "scope_value": "R23-M0"
+    },
+    "before": [
+      {
+        "template_id": 17,
+        "template_text": "instruction cache parity error corrected",
+        "level": "INFO",
+        "count": 312,
+        "first_ts": "2005-06-14T09:02:10",
+        "last_ts": "2005-06-14T09:12:01",
+        "sample": {
+          "id": 1190,
+          "dataset": "bgl",
+          "ts": "2005-06-14T09:05:41.100000",
+          "source": "R23-M0-N4-C:J12-U11",
+          "component": "KERNEL",
+          "level": "INFO",
+          "message": "instruction cache parity error corrected",
+          "template_id": 17,
+          "episode_id": 8990,
+          "highlights": [],
+          "repeat_count": 312,
+          "extra": {
+            "alert_category": null,
+            "midplane": "R23-M0"
+          }
+        }
+      },
+      {
+        "template_id": 42,
+        "template_text": "data TLB error interrupt",
+        "level": "FATAL",
+        "count": 1,
+        "first_ts": "2005-06-14T09:12:03.512345",
+        "last_ts": "2005-06-14T09:12:03.512345",
+        "sample": {
+          "id": 1201,
+          "dataset": "bgl",
+          "ts": "2005-06-14T09:12:03.512345",
+          "source": "R23-M0-NE-C:J05-U01",
+          "component": "KERNEL",
+          "level": "FATAL",
+          "message": "data TLB error interrupt",
+          "template_id": 42,
+          "episode_id": 9001,
+          "highlights": [
+            [
+              5,
+              8
+            ]
+          ],
+          "extra": {
+            "alert_category": "KERNDTLB",
+            "midplane": "R23-M0"
+          }
+        }
+      }
+    ],
+    "after": [
+      {
+        "template_id": 88,
+        "template_text": "ciod: failed to read message prefix on control stream (CioStream socket to <*>",
+        "level": "FATAL",
+        "count": 1,
+        "first_ts": "2005-06-14T09:13:10.2",
+        "last_ts": "2005-06-14T09:13:10.2",
+        "sample": {
+          "id": 1215,
+          "dataset": "bgl",
+          "ts": "2005-06-14T09:13:10.200000",
+          "source": "R23-M0-NE-C:J05-U01",
+          "component": "APP",
+          "level": "FATAL",
+          "message": "ciod: failed to read message prefix on control stream (CioStream socket to 172.16.96.116:33569",
+          "template_id": 88,
+          "episode_id": 9002,
+          "highlights": [],
+          "extra": {
+            "alert_category": "APPREAD",
+            "midplane": "R23-M0"
+          }
+        }
+      },
+      {
+        "template_id": 23,
+        "template_text": "generating <*>",
+        "level": "INFO",
+        "count": 2,
+        "first_ts": "2005-06-14T09:14:00",
+        "last_ts": "2005-06-14T09:14:05",
+        "sample": {
+          "id": 1230,
+          "dataset": "bgl",
+          "ts": "2005-06-14T09:14:00.000000",
+          "source": "R23-M0-NE-C:J05-U01",
+          "component": "KERNEL",
+          "level": "INFO",
+          "message": "generating core.2275",
+          "template_id": 23,
+          "episode_id": 9003,
+          "highlights": []
+        }
+      }
+    ]
+  },
+  "sql": [
+    "SELECT … FROM bgl_events WHERE midplane = 'R23-M0' AND ts BETWEEN TIMESTAMP '2005-06-14 09:02:03.512345' AND TIMESTAMP '2005-06-14 09:17:03.512345' …"
+  ],
+  "runtime_ms": 42,
+  "caveats": [
+    "Repeats collapsed by template; counts are exact within the window."
+  ],
+  "error": null
+}

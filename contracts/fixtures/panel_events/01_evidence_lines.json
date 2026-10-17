@@ -1,0 +1,120 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "event_id": "evt-0000001",
+  "ts": "2026-10-18T14:02:11Z",
+  "type": "evidence",
+  "role": "engineer",
+  "payload": {
+    "kind": "lines",
+    "title": "Midplane R23-M0 around the first FATAL TLB error",
+    "receipt": {
+      "receipt_id": "R-0002",
+      "tool": "get_timeline",
+      "sql": [
+        "SELECT … FROM bgl_events WHERE midplane = 'R23-M0' AND ts BETWEEN TIMESTAMP '2005-06-14 09:02:03.512345' AND TIMESTAMP '2005-06-14 09:17:03.512345' …"
+      ],
+      "scope": {
+        "dataset": "bgl",
+        "from": "2005-06-14T09:02:03",
+        "to": "2005-06-14T09:17:03",
+        "filters": {
+          "midplane": "R23-M0"
+        },
+        "unit": "lines",
+        "episode_gap": null,
+        "group_by": null,
+        "bucket": null
+      },
+      "total_matches": 316,
+      "returned": 4,
+      "truncated": false,
+      "runtime_ms": 42
+    },
+    "annotations": [
+      {
+        "line_id": 1201,
+        "label": "first FATAL",
+        "tone": "critical"
+      },
+      {
+        "line_id": 1190,
+        "label": "possible precursor (lift 13.6, R-0007)",
+        "tone": "accent"
+      }
+    ],
+    "body": {
+      "groups": [
+        {
+          "label": "before",
+          "lines": [
+            {
+              "id": 1190,
+              "ts": "2005-06-14T09:05:41.100000",
+              "dataset": "bgl",
+              "source": "R23-M0-N4-C:J12-U11",
+              "component": "KERNEL",
+              "level": "INFO",
+              "tone": "info",
+              "message": "instruction cache parity error corrected",
+              "highlights": [],
+              "repeat_count": 312
+            }
+          ]
+        },
+        {
+          "label": "anchor",
+          "lines": [
+            {
+              "id": 1201,
+              "ts": "2005-06-14T09:12:03.512345",
+              "dataset": "bgl",
+              "source": "R23-M0-NE-C:J05-U01",
+              "component": "KERNEL",
+              "level": "FATAL",
+              "tone": "critical",
+              "message": "data TLB error interrupt",
+              "highlights": [
+                [
+                  5,
+                  8
+                ]
+              ],
+              "repeat_count": 1,
+              "is_anchor": true
+            }
+          ]
+        },
+        {
+          "label": "after",
+          "lines": [
+            {
+              "id": 1215,
+              "ts": "2005-06-14T09:13:10.200000",
+              "dataset": "bgl",
+              "source": "R23-M0-NE-C:J05-U01",
+              "component": "APP",
+              "level": "FATAL",
+              "tone": "critical",
+              "message": "ciod: failed to read message prefix on control stream (CioStream socket to 172.16.96.116:33569",
+              "highlights": [],
+              "repeat_count": 1
+            },
+            {
+              "id": 1230,
+              "ts": "2005-06-14T09:14:00.000000",
+              "dataset": "bgl",
+              "source": "R23-M0-NE-C:J05-U01",
+              "component": "KERNEL",
+              "level": "INFO",
+              "tone": "info",
+              "message": "generating core.2275",
+              "highlights": [],
+              "repeat_count": 2
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

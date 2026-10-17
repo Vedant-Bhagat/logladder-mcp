@@ -1,0 +1,71 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "receipt_id": "R-0007",
+  "tool": "test_hypothesis",
+  "role": "engineer",
+  "summary": "Template 17 appeared within 10 minutes before 61 of 90 template-42 episodes on the same midplane (support 0.68) vs a baseline of 0.05 (lift 13.6).",
+  "scope": {
+    "dataset": "bgl",
+    "from": "2005-06-01",
+    "to": "2005-06-30",
+    "filters": {},
+    "unit": "episodes",
+    "episode_gap": "10m",
+    "group_by": null,
+    "bucket": null
+  },
+  "total_matches": 90,
+  "returned": 3,
+  "truncated": true,
+  "data": {
+    "cause": {
+      "template_id": 17
+    },
+    "effect": {
+      "template_id": 42
+    },
+    "window_s": 600,
+    "scope": "midplane",
+    "effect_episodes": 90,
+    "supported_episodes": 61,
+    "baseline_windows": 4320,
+    "baseline_hits": 216,
+    "forward": {
+      "support": 0.678,
+      "baseline": 0.05,
+      "lift": 13.6
+    },
+    "reverse": {
+      "support": 0.12,
+      "baseline": 0.31,
+      "lift": 0.39
+    },
+    "examples": [
+      {
+        "episode_id": 9001,
+        "midplane": "R23-M0",
+        "effect_start": "2005-06-14T09:12:03",
+        "cause_last_seen": "2005-06-14T09:12:01"
+      }
+    ],
+    "counter_examples": [
+      {
+        "episode_id": 9120,
+        "midplane": "R11-M1",
+        "effect_start": "2005-06-20T02:01:00",
+        "cause_last_seen": null
+      }
+    ],
+    "verdict": "strong"
+  },
+  "sql": [
+    "WITH eff AS (…), hits AS (…) SELECT …"
+  ],
+  "runtime_ms": 42,
+  "caveats": [
+    "Precedence is association, not proof of cause.",
+    "Baseline = share of all 10-minute windows on the same midplanes in the period that contain the cause."
+  ],
+  "error": null
+}

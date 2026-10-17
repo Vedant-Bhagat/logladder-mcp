@@ -1,0 +1,70 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "receipt_id": "R-0008",
+  "tool": "check_answer",
+  "role": "manager",
+  "summary": "4 claims checked: 3 backed, 1 flagged.",
+  "scope": {
+    "dataset": "none",
+    "from": null,
+    "to": null,
+    "filters": {},
+    "unit": null,
+    "episode_gap": null,
+    "group_by": null,
+    "bucket": null
+  },
+  "total_matches": null,
+  "returned": 4,
+  "truncated": false,
+  "data": {
+    "ok": false,
+    "counts": {
+      "backed": 3,
+      "unbacked": 0,
+      "mismatched": 0,
+      "flagged": 1
+    },
+    "claims": [
+      {
+        "text": "210 episodes",
+        "kind": "number",
+        "status": "backed",
+        "receipt_ids": [
+          "R-0005"
+        ],
+        "note": null
+      },
+      {
+        "text": "19 midplanes",
+        "kind": "number",
+        "status": "backed",
+        "receipt_ids": [
+          "R-0005"
+        ],
+        "note": null
+      },
+      {
+        "text": "121%",
+        "kind": "percent",
+        "status": "backed",
+        "receipt_ids": [
+          "R-0005"
+        ],
+        "note": "rounded from 121.1"
+      },
+      {
+        "text": "downtime",
+        "kind": "impact_word",
+        "status": "flagged",
+        "receipt_ids": [],
+        "note": "No receipt measures downtime; move to Unknowns."
+      }
+    ]
+  },
+  "sql": [],
+  "runtime_ms": 3,
+  "caveats": [],
+  "error": null
+}

@@ -1,0 +1,83 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "event_id": "evt-0000003",
+  "ts": "2026-10-18T14:02:11Z",
+  "type": "evidence",
+  "role": "team_lead",
+  "payload": {
+    "kind": "trend",
+    "title": "Weekly episodes by team",
+    "receipt": {
+      "receipt_id": "R-0004",
+      "tool": "trend",
+      "sql": [
+        "SELECT date_trunc('week', start_ts) AS t, team, count(*) AS v FROM episodes WHERE dataset='bgl' AND start_ts >= TIMESTAMP '2005-06-01' AND start_ts < TIMESTAMP '2005-06-29' GROUP BY 1, 2 ORDER BY 1"
+      ],
+      "scope": {
+        "dataset": "bgl",
+        "from": "2005-06-01",
+        "to": "2005-06-28",
+        "filters": {},
+        "unit": "episodes",
+        "episode_gap": "10m",
+        "group_by": "team",
+        "bucket": "week"
+      },
+      "total_matches": null,
+      "returned": 8,
+      "truncated": false,
+      "runtime_ms": 42
+    },
+    "annotations": [],
+    "body": {
+      "metric": "episodes",
+      "bucket": "week",
+      "unit_label": "episodes per week",
+      "series": [
+        {
+          "name": "HPC Kernel & Runtime",
+          "points": [
+            {
+              "t": "2005-05-30",
+              "v": 120
+            },
+            {
+              "t": "2005-06-06",
+              "v": 135
+            },
+            {
+              "t": "2005-06-13",
+              "v": 210
+            },
+            {
+              "t": "2005-06-20",
+              "v": 260
+            }
+          ]
+        },
+        {
+          "name": "HPC Applications Support",
+          "points": [
+            {
+              "t": "2005-05-30",
+              "v": 80
+            },
+            {
+              "t": "2005-06-06",
+              "v": 75
+            },
+            {
+              "t": "2005-06-13",
+              "v": 90
+            },
+            {
+              "t": "2005-06-20",
+              "v": 70
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

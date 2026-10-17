@@ -1,0 +1,27 @@
+# data: only the 2k samples are committed
+data/*
+!data/samples/
+!data/samples/**
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# node
+console/node_modules/
+console/dist/
+
+# env and local
+.env
+*.log
+!data/samples/*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

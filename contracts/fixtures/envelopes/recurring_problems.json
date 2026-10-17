@@ -1,0 +1,61 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "receipt_id": "R-0005",
+  "tool": "recurring_problems",
+  "role": "team_lead",
+  "summary": "Top 2 recurring BGL problems by episodes, 2005-06-01 to 2005-06-30, compared with the previous 30 days.",
+  "scope": {
+    "dataset": "bgl",
+    "from": "2005-06-01",
+    "to": "2005-06-30",
+    "filters": {},
+    "unit": "episodes",
+    "episode_gap": "10m",
+    "group_by": "template",
+    "bucket": null
+  },
+  "total_matches": null,
+  "returned": 2,
+  "truncated": true,
+  "data": {
+    "items": [
+      {
+        "rank": 1,
+        "template_id": 42,
+        "template_text": "data TLB error interrupt",
+        "dataset": "bgl",
+        "component": "KERNEL",
+        "team": "HPC Kernel & Runtime",
+        "episodes": 210,
+        "lines": 1284,
+        "distinct_scopes": 19,
+        "max_level": "FATAL",
+        "prev_episodes": 95,
+        "change_pct": 121.1
+      },
+      {
+        "rank": 2,
+        "template_id": 88,
+        "template_text": "ciod: failed to read message prefix on control stream (CioStream socket to <*>",
+        "dataset": "bgl",
+        "component": "APP",
+        "team": "HPC Applications Support",
+        "episodes": 160,
+        "lines": 5400,
+        "distinct_scopes": 31,
+        "max_level": "FATAL",
+        "prev_episodes": 170,
+        "change_pct": -5.9
+      }
+    ]
+  },
+  "sql": [
+    "SELECT e.template_id, t.template_text, … FROM episodes e JOIN templates t USING (template_id) WHERE …"
+  ],
+  "runtime_ms": 42,
+  "caveats": [
+    "Showing top 2 of 57 templates with episodes in this window."
+  ],
+  "error": null
+}

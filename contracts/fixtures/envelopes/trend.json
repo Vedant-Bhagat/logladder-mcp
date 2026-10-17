@@ -1,0 +1,94 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "receipt_id": "R-0004",
+  "tool": "trend",
+  "role": "team_lead",
+  "summary": "Weekly BGL episodes for the top 2 teams over 4 weeks.",
+  "scope": {
+    "dataset": "bgl",
+    "from": "2005-06-01",
+    "to": "2005-06-28",
+    "filters": {},
+    "unit": "episodes",
+    "episode_gap": "10m",
+    "group_by": "team",
+    "bucket": "week"
+  },
+  "total_matches": null,
+  "returned": 8,
+  "truncated": false,
+  "data": {
+    "metric": "episodes",
+    "bucket": "week",
+    "unit_label": "episodes per week",
+    "series": [
+      {
+        "name": "HPC Kernel & Runtime",
+        "points": [
+          {
+            "t": "2005-05-30",
+            "v": 120
+          },
+          {
+            "t": "2005-06-06",
+            "v": 135
+          },
+          {
+            "t": "2005-06-13",
+            "v": 210
+          },
+          {
+            "t": "2005-06-20",
+            "v": 260
+          }
+        ]
+      },
+      {
+        "name": "HPC Applications Support",
+        "points": [
+          {
+            "t": "2005-05-30",
+            "v": 80
+          },
+          {
+            "t": "2005-06-06",
+            "v": 75
+          },
+          {
+            "t": "2005-06-13",
+            "v": 90
+          },
+          {
+            "t": "2005-06-20",
+            "v": 70
+          }
+        ]
+      }
+    ],
+    "change": [
+      {
+        "name": "HPC Kernel & Runtime",
+        "first_half": 255,
+        "second_half": 470,
+        "slope_per_bucket": 48.5,
+        "last_vs_prev_pct": 23.8
+      },
+      {
+        "name": "HPC Applications Support",
+        "first_half": 155,
+        "second_half": 160,
+        "slope_per_bucket": -1.5,
+        "last_vs_prev_pct": -22.2
+      }
+    ]
+  },
+  "sql": [
+    "SELECT date_trunc('week', start_ts) AS t, team, count(*) AS v FROM episodes WHERE dataset='bgl' AND start_ts >= TIMESTAMP '2005-06-01' AND start_ts < TIMESTAMP '2005-06-29' GROUP BY 1, 2 ORDER BY 1"
+  ],
+  "runtime_ms": 42,
+  "caveats": [
+    "Weeks start on Monday; partial first/last weeks are included as-is."
+  ],
+  "error": null
+}

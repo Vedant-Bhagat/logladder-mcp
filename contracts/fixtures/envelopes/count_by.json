@@ -1,0 +1,65 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "receipt_id": "R-0003",
+  "tool": "count_by",
+  "role": "team_lead",
+  "summary": "BGL episodes over the full span grouped by team: 4 teams, 12,480 episodes in total.",
+  "scope": {
+    "dataset": "bgl",
+    "from": null,
+    "to": null,
+    "filters": {},
+    "unit": "episodes",
+    "episode_gap": "10m",
+    "group_by": "team",
+    "bucket": null
+  },
+  "total_matches": 12480,
+  "returned": 4,
+  "truncated": false,
+  "data": {
+    "group_by": "team",
+    "unit": "episodes",
+    "total": 12480,
+    "other": null,
+    "rows": [
+      {
+        "key": "HPC Kernel & Runtime",
+        "label": "HPC Kernel & Runtime",
+        "count": 7020,
+        "share": 0.5625,
+        "team": "HPC Kernel & Runtime"
+      },
+      {
+        "key": "HPC Applications Support",
+        "label": "HPC Applications Support",
+        "count": 3110,
+        "share": 0.2492,
+        "team": "HPC Applications Support"
+      },
+      {
+        "key": "HPC Hardware & Interconnect",
+        "label": "HPC Hardware & Interconnect",
+        "count": 1650,
+        "share": 0.1322,
+        "team": "HPC Hardware & Interconnect"
+      },
+      {
+        "key": "HPC Control System",
+        "label": "HPC Control System",
+        "count": 700,
+        "share": 0.0561,
+        "team": "HPC Control System"
+      }
+    ]
+  },
+  "sql": [
+    "SELECT team, count(*) AS n FROM episodes WHERE dataset = 'bgl' GROUP BY team ORDER BY n DESC"
+  ],
+  "runtime_ms": 42,
+  "caveats": [
+    "Episodes, not lines: a burst of one message on one midplane with gaps under 10m counts once."
+  ],
+  "error": null
+}

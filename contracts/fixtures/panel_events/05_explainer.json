@@ -1,0 +1,58 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "event_id": "evt-0000005",
+  "ts": "2026-10-18T14:02:11Z",
+  "type": "explainer",
+  "role": "engineer",
+  "payload": {
+    "title": "Why R23-M0 failed: what we know and don't",
+    "markdown": "### Observed\n- First FATAL `data TLB error interrupt` on R23-M0 at 09:12:03 [R-0002]\n- 312 corrected parity errors on the same midplane in the 10 minutes before [R-0002]\n\n### Hypothesis\n- Parity-error bursts precede TLB failures on the same midplane: support 0.68 vs baseline 0.05, lift 13.6 [R-0007]. Reverse direction is weak (lift 0.39). **Association, not proof.**\n\n### Unknowns\n- Whether the hardware was replaced; any user impact.\n\n### Next step\n- Check the node-card error counters on R23-M0 and compare with the 3 counter-example midplanes [R-0007].",
+    "receipts": [
+      {
+        "receipt_id": "R-0002",
+        "tool": "get_timeline",
+        "sql": [
+          "SELECT … FROM bgl_events WHERE midplane = 'R23-M0' AND ts BETWEEN TIMESTAMP '2005-06-14 09:02:03.512345' AND TIMESTAMP '2005-06-14 09:17:03.512345' …"
+        ],
+        "scope": {
+          "dataset": "bgl",
+          "from": "2005-06-14T09:02:03",
+          "to": "2005-06-14T09:17:03",
+          "filters": {
+            "midplane": "R23-M0"
+          },
+          "unit": "lines",
+          "episode_gap": null,
+          "group_by": null,
+          "bucket": null
+        },
+        "total_matches": 316,
+        "returned": 4,
+        "truncated": false,
+        "runtime_ms": 42
+      },
+      {
+        "receipt_id": "R-0007",
+        "tool": "test_hypothesis",
+        "sql": [
+          "WITH eff AS (…), hits AS (…) SELECT …"
+        ],
+        "scope": {
+          "dataset": "bgl",
+          "from": "2005-06-01",
+          "to": "2005-06-30",
+          "filters": {},
+          "unit": "episodes",
+          "episode_gap": "10m",
+          "group_by": null,
+          "bucket": null
+        },
+        "total_matches": 90,
+        "returned": 3,
+        "truncated": true,
+        "runtime_ms": 42
+      }
+    ]
+  }
+}

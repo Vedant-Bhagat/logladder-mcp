@@ -1,0 +1,112 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "receipt_id": "R-0006",
+  "tool": "rank_risks",
+  "role": "manager",
+  "summary": "3 problems scored from measured frequency, spread, trend, severity and labels over the last 30 days of BGL.",
+  "scope": {
+    "dataset": "bgl",
+    "from": "2005-12-06",
+    "to": "2006-01-04",
+    "filters": {},
+    "unit": "episodes",
+    "episode_gap": "10m",
+    "group_by": "template",
+    "bucket": null
+  },
+  "total_matches": null,
+  "returned": 3,
+  "truncated": false,
+  "data": {
+    "weights": {
+      "F": 0.3,
+      "S": 0.25,
+      "T": 0.2,
+      "V": 0.15,
+      "L": 0.1
+    },
+    "items": [
+      {
+        "rank": 1,
+        "template_id": 42,
+        "title": "data TLB error interrupt (KERNEL)",
+        "dataset": "bgl",
+        "team": "HPC Kernel & Runtime",
+        "score": 86.5,
+        "inputs": {
+          "F": 0.95,
+          "S": 0.8,
+          "T": 0.9,
+          "V": 1.0,
+          "L": 0.6
+        },
+        "raw": {
+          "episodes": 210,
+          "distinct_scopes": 19,
+          "first_half_episodes": 70,
+          "second_half_episodes": 140,
+          "max_level": "FATAL",
+          "labelled_share": 0.6
+        },
+        "stability_top3": 1.0
+      },
+      {
+        "rank": 2,
+        "template_id": 88,
+        "title": "ciod: failed to read message prefix (APP)",
+        "dataset": "bgl",
+        "team": "HPC Applications Support",
+        "score": 71.0,
+        "inputs": {
+          "F": 0.85,
+          "S": 0.95,
+          "T": 0.3,
+          "V": 1.0,
+          "L": 0.4
+        },
+        "raw": {
+          "episodes": 160,
+          "distinct_scopes": 31,
+          "first_half_episodes": 82,
+          "second_half_episodes": 78,
+          "max_level": "FATAL",
+          "labelled_share": 0.4
+        },
+        "stability_top3": 0.9
+      },
+      {
+        "rank": 3,
+        "template_id": 51,
+        "title": "machine check interrupt (KERNEL)",
+        "dataset": "bgl",
+        "team": "HPC Kernel & Runtime",
+        "score": 58.2,
+        "inputs": {
+          "F": 0.4,
+          "S": 0.35,
+          "T": 0.7,
+          "V": 1.0,
+          "L": 0.9
+        },
+        "raw": {
+          "episodes": 40,
+          "distinct_scopes": 6,
+          "first_half_episodes": 12,
+          "second_half_episodes": 28,
+          "max_level": "FATAL",
+          "labelled_share": 0.9
+        },
+        "stability_top3": 0.6
+      }
+    ]
+  },
+  "sql": [
+    "SELECT … FROM episodes WHERE dataset='bgl' AND start_ts >= TIMESTAMP '2005-12-06' …"
+  ],
+  "runtime_ms": 42,
+  "caveats": [
+    "Weights are a policy choice, not a measurement. Score says nothing about business impact."
+  ],
+  "error": null
+}

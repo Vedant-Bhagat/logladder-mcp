@@ -1,0 +1,27 @@
+# Replace @vedant-gh, @janhavi-gh, @ayoub-gh with real GitHub usernames at V0.
+# Ownership mirrors docs/specs/00-team-contract.md §2.
+
+*                                   @vedant-gh
+
+/loglad_mcp/core/context.py         @janhavi-gh
+/loglad_mcp/core/envelope.py        @janhavi-gh
+/loglad_mcp/core/receipts.py        @janhavi-gh
+/loglad_mcp/core/limits.py          @janhavi-gh
+/loglad_mcp/core/console.py         @janhavi-gh
+/loglad_mcp/core/timeparse.py       @janhavi-gh
+/loglad_mcp/tools/                  @janhavi-gh
+/loglad_mcp/reasoning/              @janhavi-gh
+/loglad_mcp/prompts/                @janhavi-gh
+/loglad_mcp/resources/              @janhavi-gh
+/tests/tools/                       @janhavi-gh
+/tests/reasoning/                   @janhavi-gh
+/docs/tools.md                      @janhavi-gh
+/docs/tool_selection.md             @janhavi-gh
+/docs/handoff/janhavi.md            @janhavi-gh
+
+/console/                           @ayoub-gh
+/docs/slides/                       @ayoub-gh
+/docs/handoff/ayoub.md              @ayoub-gh
+/docs/handoff/img/                  @ayoub-gh
+
+/contracts/                         @vedant-gh

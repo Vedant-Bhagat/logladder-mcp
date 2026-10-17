@@ -1,0 +1,33 @@
+# Owner: Vedant. Ask him before adding a dependency. Pin exact versions after the first successful install (V0).
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loglad"
+version = "0.1.0"
+description = "LogLadder: evidence-first MCP server over SereneDB for the Making Sense of Logs challenge"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "mcp",
+  "psycopg[binary]",
+  "pydantic",
+  "pyarrow",
+  "drain3",
+  "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "jsonschema>=4.18", "ruff"]
+
+[tool.setuptools.packages.find]
+include = ["loglad_mcp*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["db: needs a running SereneDB with sample data loaded"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"

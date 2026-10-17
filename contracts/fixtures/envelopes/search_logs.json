@@ -1,0 +1,80 @@
+{
+  "contract": 1,
+  "fixture": true,
+  "receipt_id": "R-0001",
+  "tool": "search_logs",
+  "role": "engineer",
+  "summary": "1,284 BGL lines matched 'TLB error' at level FATAL between 2005-06-01 and 2005-06-30; showing the 2 most relevant.",
+  "scope": {
+    "dataset": "bgl",
+    "from": "2005-06-01",
+    "to": "2005-06-30",
+    "filters": {
+      "level": "FATAL"
+    },
+    "unit": "lines",
+    "episode_gap": null,
+    "group_by": null,
+    "bucket": null
+  },
+  "total_matches": 1284,
+  "returned": 2,
+  "truncated": true,
+  "data": {
+    "query": "TLB error",
+    "match": "phrase",
+    "lines": [
+      {
+        "id": 1201,
+        "dataset": "bgl",
+        "ts": "2005-06-14T09:12:03.512345",
+        "source": "R23-M0-NE-C:J05-U01",
+        "component": "KERNEL",
+        "level": "FATAL",
+        "message": "data TLB error interrupt",
+        "template_id": 42,
+        "episode_id": 9001,
+        "highlights": [
+          [
+            5,
+            8
+          ]
+        ],
+        "extra": {
+          "alert_category": "KERNDTLB",
+          "midplane": "R23-M0"
+        }
+      },
+      {
+        "id": 1207,
+        "dataset": "bgl",
+        "ts": "2005-06-14T09:12:04.000112",
+        "source": "R23-M0-NE-C:J05-U01",
+        "component": "KERNEL",
+        "level": "FATAL",
+        "message": "data TLB error interrupt",
+        "template_id": 42,
+        "episode_id": 9001,
+        "highlights": [
+          [
+            5,
+            8
+          ]
+        ],
+        "extra": {
+          "alert_category": "KERNDTLB",
+          "midplane": "R23-M0"
+        }
+      }
+    ]
+  },
+  "sql": [
+    "SELECT id, ts, node, component, level, message, template_id, episode_id, midplane, alert_category FROM bgl_idx WHERE message @@ ts_phrase('TLB error') AND level @@ 'FATAL' AND ts @@ ts_between(TIMESTAMP '2005-06-01', TIMESTAMP '2005-06-30', true, true) ORDER BY BM25(bgl_idx.tableoid) DESC LIMIT 2",
+    "SELECT count(*) AS n FROM bgl_idx WHERE message @@ ts_phrase('TLB error') AND level @@ 'FATAL' AND ts @@ ts_between(TIMESTAMP '2005-06-01', TIMESTAMP '2005-06-30', true, true)"
+  ],
+  "runtime_ms": 42,
+  "caveats": [
+    "Sample of 2 of 1,284 matching lines; use count_by or recurring_problems for frequencies, not this sample."
+  ],
+  "error": null
+}

@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://loglad.local/contracts/panel_event.schema.json",
+  "title": "LogLadder console panel event (contract v1)",
+  "description": "Sent by loglad_mcp display tools (and check_answer) as HTTP POST to {LOGLAD_CONSOLE_URL}/api/panel; the console broadcasts it unchanged on WS /ws/panels. The console never talks to SereneDB: everything it shows arrives in these events. FROZEN: change only through the contract-change process.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract", "event_id", "ts", "type", "role", "payload"],
+  "properties": {
+    "contract": { "const": 1 },
+    "event_id": { "type": "string", "minLength": 8 },
+    "ts": { "type": "string", "description": "ISO 8601 wall-clock time the event was created" },
+    "type": { "enum": ["evidence", "explainer", "status", "reset"] },
+    "role": { "enum": ["engineer", "team_lead", "manager", "unknown"] },
+    "payload": { "type": "object" },
+    "fixture": { "type": "boolean", "description": "Only present (true) in contracts/fixtures." }
+  },
+  "allOf": [
+    { "if": { "properties": { "type": { "const": "evidence" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/EvidencePayload" } } } },
+    { "if": { "properties": { "type": { "const": "explainer" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/ExplainerPayload" } } } },
+    { "if": { "properties": { "type": { "const": "status" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/StatusPayload" } } } },
+    { "if": { "properties": { "type": { "const": "reset" } } }, "then": { "properties": { "payload": { "type": "object", "maxProperties": 0 } } } }
+  ],
+  "$defs": {
+    "Tone": { "enum": ["critical", "error", "warning", "info", "accent", "good"] },
+    "ReceiptRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "tool", "sql", "scope", "total_matches", "returned", "truncated", "runtime_ms"],
+      "properties": {
+        "receipt_id": { "type": "string", "pattern": "^R-[0-9]{4,}$" },
+        "tool": { "type": "string" },
+        "sql": { "type": "array", "items": { "type": "string" } },
+        "scope": { "type": "object" },
+        "total_matches": { "type": ["integer", "null"] },
+        "returned": { "type": "integer" },
+        "truncated": { "type": "boolean" },
+        "runtime_ms": { "type": "integer" }
+      }
+    },
+    "PanelLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "ts", "dataset", "source", "component", "level", "tone", "message", "highlights", "repeat_count"],
+      "properties": {
+        "id": { "type": "integer" },
+        "ts": { "type": "string" },
+        "dataset": { "enum": ["bgl", "openstack"] },
+        "source": { "type": "string" },
+        "component": { "type": ["string", "null"] },
+        "level": { "type": "string" },
+        "tone": { "$ref": "#/$defs/Tone", "description": "Pre-computed by the MCP side from level: FATAL/FAILURE/CRITICAL->critical, ERROR/SEVERE->error, WARNING->warning, else info" },
+        "message": { "type": "string" },
+        "highlights": { "type": "array", "items": { "type": "array", "prefixItems": [{ "type": "integer" }, { "type": "integer" }], "minItems": 2, "maxItems": 2 }, "description": "[start, end) character offsets into message" },
+        "repeat_count": { "type": "integer", "minimum": 1, "description": ">1 means this row stands for N collapsed lines of the same template" },
+        "is_anchor": { "type": "boolean" }
+      }
+    },
+    "Annotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["line_id", "label", "tone"],
+      "properties": {
+        "line_id": { "type": "integer" },
+        "label": { "type": "string", "maxLength": 60 },
+        "tone": { "$ref": "#/$defs/Tone" }
+      }
+    },
+    "LinesBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["groups"],
+      "properties": {
+        "groups": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "lines"],
+            "properties": {
+              "label": { "enum": ["matches", "before", "anchor", "after", "trace"] },
+              "lines": { "type": "array", "maxItems": 50, "items": { "$ref": "#/$defs/PanelLine" } }
+            }
+          }
+        }
+      }
+    },
+    "TableBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["columns", "rows", "total_row"],
+      "properties": {
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["key", "label", "type"],
+            "properties": {
+              "key": { "type": "string" },
+              "label": { "type": "string" },
+              "type": { "enum": ["text", "int", "float", "percent", "team", "level", "change"] }
+            }
+          }
+        },
+        "rows": { "type": "array", "maxItems": 26, "items": { "type": "object" } },
+        "total_row": { "type": ["object", "null"] }
+      }
+    },
+    "TrendBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "bucket", "unit_label", "series"],
+      "properties": {
+        "metric": { "type": "string" },
+        "bucket": { "enum": ["day", "week"] },
+        "unit_label": { "type": "string" },
+        "series": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "points"],
+            "properties": {
+              "name": { "type": "string" },
+              "points": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["t", "v"], "properties": { "t": { "type": "string" }, "v": { "type": ["number", "null"] } } } }
+            }
+          }
+        }
+      }
+    },
+    "RisksBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weights", "items"],
+      "properties": {
+        "weights": { "type": "object", "required": ["F", "S", "T", "V", "L"] },
+        "items": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rank", "title", "dataset", "team", "score", "inputs", "stability_top3", "action"],
+            "properties": {
+              "rank": { "type": "integer" },
+              "title": { "type": "string" },
+              "dataset": { "enum": ["bgl", "openstack"] },
+              "team": { "type": "string" },
+              "score": { "type": "number" },
+              "inputs": { "type": "object", "required": ["F", "S", "T", "V", "L"] },
+              "stability_top3": { "type": "number", "minimum": 0, "maximum": 1 },
+              "action": { "type": ["string", "null"], "description": "Written by Claude via show_evidence(actions=...); null if none given" }
+            }
+          }
+        }
+      }
+    },
+    "EvidencePayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "title", "receipt", "annotations", "body"],
+      "properties": {
+        "kind": { "enum": ["lines", "table", "trend", "risks"] },
+        "title": { "type": "string", "maxLength": 120 },
+        "receipt": { "$ref": "#/$defs/ReceiptRef" },
+        "annotations": { "type": "array", "maxItems": 10, "items": { "$ref": "#/$defs/Annotation" } },
+        "body": { "type": "object" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "lines" } } }, "then": { "properties": { "body": { "$ref": "#/$defs/LinesBody" } } } },
+        { "if": { "properties": { "kind": { "const": "table" } } }, "then": { "properties": { "body": { "$ref": "#/$defs/TableBody" } } } },
+        { "if": { "properties": { "kind": { "const": "trend" } } }, "then": { "properties": { "body": { "$ref": "#/$defs/TrendBody" } } } },
+        { "if": { "properties": { "kind": { "const": "risks" } } }, "then": { "properties": { "body": { "$ref": "#/$defs/RisksBody" } } } }
+      ]
+    },
+    "ExplainerPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "markdown", "receipts"],
+      "properties": {
+        "title": { "type": "string", "maxLength": 120 },
+        "markdown": { "type": "string", "maxLength": 8000, "description": "CommonMark. Receipt IDs written as [R-0042] must render as clickable chips that open that receipt from `receipts`." },
+        "receipts": { "type": "array", "items": { "$ref": "#/$defs/ReceiptRef" } }
+      }
+    },
+    "StatusPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_count", "claims"],
+      "properties": {
+        "receipt_count": { "type": "integer" },
+        "claims": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "object", "additionalProperties": false, "required": ["backed", "unbacked", "mismatched", "flagged"], "properties": { "backed": { "type": "integer" }, "unbacked": { "type": "integer" }, "mismatched": { "type": "integer" }, "flagged": { "type": "integer" } } }
+          ]
+        }
+      }
+    }
+  }
+}
