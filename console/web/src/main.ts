@@ -1,4 +1,4 @@
-// Console page: header, terminal pane, evidence + explainer panels. All panel data arrives over WS /ws/panels.
+// Console page: header, evidence + explainer panels (Claude runs in the presenter's own terminal). All panel data arrives over WS /ws/panels.
 import "@awesome.me/webawesome/dist/styles/themes/default.css";
 import "@awesome.me/webawesome/dist/components/split-panel/split-panel.js";
 import "@awesome.me/webawesome/dist/components/drawer/drawer.js";
@@ -15,7 +15,6 @@ import { renderMarkdown, receiptChip } from "./explainer";
 import { claimsState, countLabel, esc, fmtInt, scopeLabel } from "./format";
 import { KIND_ICON, ROLE_ICON, icon } from "./icons";
 import { ReceiptStore, receiptHtml } from "./receipts";
-import { mountTerminal, type TerminalState } from "./terminal";
 import type { EvidencePayload, ExplainerPayload, PanelEvent, Role, StatusPayload, TrendBody } from "./types";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -43,7 +42,7 @@ const ui = {
 function renderRoles(): void {
   $("roles").innerHTML = ROLES.map(
     (r) =>
-      `<button class="role" data-role="${r.key}" aria-pressed="${ui.role === r.key}" title="${r.label}: types /mcp__loglad__${r.key} into Claude (press Enter to run)">${icon(ROLE_ICON[r.key])}<span>${r.label}</span></button>`,
+      `<button class="role" data-role="${r.key}" aria-pressed="${ui.role === r.key}" title="${r.label}: copies /mcp__loglad__${r.key} to paste into Claude">${icon(ROLE_ICON[r.key])}<span>${r.label}</span></button>`,
   ).join("");
 }
 
@@ -274,20 +273,25 @@ function connectPanels(retry = 500): void {
   };
 }
 
-/* ---------- terminal ---------- */
+/* ---------- role command ---------- */
 
-function terminalState(s: TerminalState, reason?: string): void {
-  const overlay = $("termOverlay");
-  if (s === "running") {
-    overlay.hidden = true;
-    return;
-  }
-  overlay.hidden = false;
-  if (s === "exited") {
-    overlay.innerHTML = `<div class="ov">${icon("terminal")}<p>The terminal session ended.</p><button class="btn" id="restartTerm">${icon("restart")} Restart</button></div>`;
-    $("restartTerm").onclick = () => fetch("/api/terminal/restart", { method: "POST" });
-  } else {
-    overlay.innerHTML = `<div class="ov">${icon("terminal")}<p><b>Terminal disabled</b> — run <code>claude</code> in Windows Terminal next to this window.</p><p class="muted small">${esc(reason ?? "")}</p></div>`;
+let toastTimer = 0;
+function toast(html: string): void {
+  const t = $("toast");
+  t.innerHTML = html;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => (t.hidden = true), 3200);
+}
+
+/** Claude runs in the presenter's own terminal, so the role pill copies its slash command for pasting. */
+async function copyRoleCommand(role: Role): Promise<void> {
+  const cmd = `/mcp__loglad__${role}`;
+  try {
+    await navigator.clipboard.writeText(cmd);
+    toast(`${icon(ROLE_ICON[role])}<span>Copied <code>${esc(cmd)}</code> — paste it into Claude</span>`);
+  } catch {
+    toast(`${icon(ROLE_ICON[role])}<span>Type <code>${esc(cmd)}</code> in Claude</span>`);
   }
 }
 
@@ -304,7 +308,8 @@ document.addEventListener("click", (e) => {
   if (role) {
     ui.role = role.dataset.role as Role;
     renderRoles();
-    fetch("/api/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: ui.role }) }).finally(() => term.focus());
+    copyRoleCommand(ui.role);
+    fetch("/api/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: ui.role }) }).catch(() => {});
     return;
   }
   const dot = t.closest<HTMLElement>(".dot[data-i]");
@@ -373,22 +378,8 @@ $("evBody").addEventListener("mouseleave", () => {
 });
 new ResizeObserver(() => drawTrend()).observe($("evBody"));
 
-// Presenter shortcut: Ctrl+Shift+F hides/shows the terminal so the panels fill the screen.
-let savedSplit = 58;
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "f") {
-    e.preventDefault();
-    const split = $("mainSplit") as HTMLElement & { position: number };
-    if (split.position > 1) {
-      savedSplit = split.position;
-      split.position = 0;
-    } else split.position = savedSplit;
-  }
-});
-
 renderRoles();
 renderHeader();
 renderEvidence();
 renderExplainer();
-const term = mountTerminal($("termHost"), terminalState, `${wsBase}/ws/terminal`);
 connectPanels();

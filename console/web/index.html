@@ -22,40 +22,35 @@
     </header>
     <div class="banner" id="banner" hidden>Reconnecting to the console server…</div>
 
-    <wa-split-panel class="main" id="mainSplit" position="58">
-      <section slot="start" class="term-pane" aria-label="Claude Code terminal">
-        <div class="term-host" id="termHost"></div>
-        <div class="term-overlay" id="termOverlay" hidden></div>
+    <wa-split-panel class="main" id="mainSplit" orientation="vertical" position="62">
+      <section slot="start" class="panel evidence" id="evidence" aria-label="Evidence">
+        <div class="phead">
+          <span class="kind" id="evKind"></span>
+          <h2 class="ptitle" id="evTitle">Evidence</h2>
+          <span class="count" id="evCount"></span>
+          <span class="trunc" id="evTrunc" hidden></span>
+          <span id="evChip"></span>
+        </div>
+        <div class="pbody" id="evBody" tabindex="-1"></div>
+        <div class="pfoot" id="evFoot" hidden>
+          <button class="nav" id="evPrev" aria-label="Previous evidence"></button>
+          <div class="dots" id="evDots"></div>
+          <button class="nav" id="evNext" aria-label="Next evidence"></button>
+          <button class="live" id="evLive">LIVE</button>
+        </div>
       </section>
-      <wa-split-panel slot="end" orientation="vertical" position="62" class="side">
-        <section slot="start" class="panel evidence" id="evidence" aria-label="Evidence">
-          <div class="phead">
-            <span class="kind" id="evKind"></span>
-            <h2 class="ptitle" id="evTitle">Evidence</h2>
-            <span class="count" id="evCount"></span>
-            <span class="trunc" id="evTrunc" hidden></span>
-            <span id="evChip"></span>
-          </div>
-          <div class="pbody" id="evBody" tabindex="-1"></div>
-          <div class="pfoot" id="evFoot" hidden>
-            <button class="nav" id="evPrev" aria-label="Previous evidence"></button>
-            <div class="dots" id="evDots"></div>
-            <button class="nav" id="evNext" aria-label="Next evidence"></button>
-            <button class="live" id="evLive">LIVE</button>
-          </div>
-        </section>
-        <section slot="end" class="panel explainer" id="explainer" aria-label="Explainer">
-          <div class="phead">
-            <span class="kind" id="xpKind"></span>
-            <h2 class="ptitle" id="xpTitle">Explainer</h2>
-          </div>
-          <div class="pbody md" id="xpBody"></div>
-        </section>
-      </wa-split-panel>
+      <section slot="end" class="panel explainer" id="explainer" aria-label="Explainer">
+        <div class="phead">
+          <span class="kind" id="xpKind"></span>
+          <h2 class="ptitle" id="xpTitle">Explainer</h2>
+        </div>
+        <div class="pbody md" id="xpBody"></div>
+      </section>
     </wa-split-panel>
 
     <wa-drawer id="drawer" placement="end" light-dismiss></wa-drawer>
     <div class="tooltip-float" id="chartTip" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>
