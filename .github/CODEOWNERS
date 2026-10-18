@@ -1,27 +1,26 @@
-# Replace @vedant-gh, @janhavi-gh, @ayoub-gh with real GitHub usernames at V0.
 # Ownership mirrors docs/specs/00-team-contract.md §2.
 
-*                                   @vedant-gh
+*                                   @Vedant-Bhagat
 
-/loglad_mcp/core/context.py         @janhavi-gh
-/loglad_mcp/core/envelope.py        @janhavi-gh
-/loglad_mcp/core/receipts.py        @janhavi-gh
-/loglad_mcp/core/limits.py          @janhavi-gh
-/loglad_mcp/core/console.py         @janhavi-gh
-/loglad_mcp/core/timeparse.py       @janhavi-gh
-/loglad_mcp/tools/                  @janhavi-gh
-/loglad_mcp/reasoning/              @janhavi-gh
-/loglad_mcp/prompts/                @janhavi-gh
-/loglad_mcp/resources/              @janhavi-gh
-/tests/tools/                       @janhavi-gh
-/tests/reasoning/                   @janhavi-gh
-/docs/tools.md                      @janhavi-gh
-/docs/tool_selection.md             @janhavi-gh
-/docs/handoff/janhavi.md            @janhavi-gh
+/loglad_mcp/core/context.py         @janhavi8112
+/loglad_mcp/core/envelope.py        @janhavi8112
+/loglad_mcp/core/receipts.py        @janhavi8112
+/loglad_mcp/core/limits.py          @janhavi8112
+/loglad_mcp/core/console.py         @janhavi8112
+/loglad_mcp/core/timeparse.py       @janhavi8112
+/loglad_mcp/tools/                  @janhavi8112
+/loglad_mcp/reasoning/              @janhavi8112
+/loglad_mcp/prompts/                @janhavi8112
+/loglad_mcp/resources/              @janhavi8112
+/tests/tools/                       @janhavi8112
+/tests/reasoning/                   @janhavi8112
+/docs/tools.md                      @janhavi8112
+/docs/tool_selection.md             @janhavi8112
+/docs/handoff/janhavi.md            @janhavi8112
 
-/console/                           @ayoub-gh
-/docs/slides/                       @ayoub-gh
-/docs/handoff/ayoub.md              @ayoub-gh
-/docs/handoff/img/                  @ayoub-gh
+/console/                           @ayoublabrinssi
+/docs/slides/                       @ayoublabrinssi
+/docs/handoff/ayoub.md              @ayoublabrinssi
+/docs/handoff/img/                  @ayoublabrinssi
 
-/contracts/                         @vedant-gh
+/contracts/                         @Vedant-Bhagat

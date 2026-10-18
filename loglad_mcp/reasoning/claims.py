@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any
 
 RID_RE = re.compile(r"\bR-(\d{4,})\b")
@@ -25,7 +26,9 @@ DATE_RE = re.compile(r"\b\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6
 TIME_RE = re.compile(r"(?<![\d:])\d{1,2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?![\d:])")
 PERCENT_RE = re.compile(r"(?<![\w.])[-+−]?\d[\d,]*(?:\.\d+)?\s?%")
 NUMBER_RE = re.compile(r"(?<![\w.\-/:])[-+−]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\w\-/:%]|\.\d)")
-STRUCTURAL_RE = re.compile(r"\b(?:top|first|last|bottom)\s+(?:[1-9]|10)\b", re.IGNORECASE)
+# positions in a list, not measurements: "top 5", "ranks 1, 2 and 4", "#3"
+STRUCTURAL_RE = re.compile(r"\b(?:top|first|last|bottom)\s+(?:[1-9]|10)\b"
+                           r"|\branks?\s+#?\d+(?:\s*(?:,|and|or|to|-|–)\s*#?\d+)*|(?<![\w&])#\d+\b", re.IGNORECASE)
 BACKTICK_RE = re.compile(r"`[^`]*`")
 UNIT_WORD_RE = re.compile(r"^\s*([A-Za-z][A-Za-z\-]{0,24})")
 DURATION = {"s": 1, "sec": 1, "secs": 1, "second": 1, "seconds": 1, "m": 60, "min": 60, "mins": 60,
@@ -132,9 +135,19 @@ def collect_values(record: dict) -> Values:
 
     walk(record.get("data"))
     walk(record.get("scope"))
+    walk(record.get("params"))  # what was asked (top_n, limit, window_s, ...) is in the receipt too
+    vals.numbers += _span_seconds(record.get("scope") or {})
     for k in ("total_matches", "returned"):
         walk(record.get(k))
     return vals
+
+
+def _span_seconds(scope: dict) -> list[float]:
+    """Length of the scope's time window, so "the last 30 days" matches a 30-day window."""
+    try:
+        return [(datetime.fromisoformat(scope["to"]) - datetime.fromisoformat(scope["from"])).total_seconds()]
+    except (KeyError, TypeError, ValueError):
+        return []
 
 
 def _decimals(token: str) -> int:

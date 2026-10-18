@@ -151,6 +151,18 @@ def test_structural_numbers_ignored():
     assert r["claims"] == []
 
 
+def test_list_positions_params_and_window_length_backed():
+    rec = {"R-0009": {"data": {"risks": [{"score": 92.1}]}, "params": {"top_n": 8, "dataset": "bgl"},
+                      "scope": {"from": "2005-12-05T08:00:05", "to": "2006-01-04T08:00:05"},
+                      "total_matches": 348, "returned": 5}}
+    r = claims.check("- HPC owns ranks 1, 2, 4 and 5, and #3 scores 92.1 [R-0009].\n"
+                     "- Over the last 30 days, the 8 largest problems [R-0009].\n- 31 days [R-0009]", rec.get)
+    c = by_text(r)
+    assert set(c) == {"92.1", "30 days", "8 largest", "31 days"}, c
+    assert c["30 days"]["status"] == c["8 largest"]["status"] == "backed"
+    assert c["31 days"]["status"] == "mismatched"
+
+
 def test_causal_and_impact_words_by_section():
     r = check("### Observed\n- Kernel panics happened because of parity errors [R-0005].\n"
               "### Hypotheses\n- Parity errors may have caused it [R-0007].\n"

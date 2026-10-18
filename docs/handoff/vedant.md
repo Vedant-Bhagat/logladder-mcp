@@ -104,9 +104,7 @@ data --sample (parse)  ->  bgl: 2,000 rows, 106 templates, 0 rejects · openstac
 
 - Rehearse the demo twice; record the backup video (people, not code). Run `/login` in Claude Code first: it said the login expires in 3 days.
 - Receipt ids clash when two Claude sessions run at once (`ReceiptStore` reads max id once); README says one session at a time.
-- `show_evidence` receipts store `annotations` as repr strings, so that call can't be replayed from `params_json` (Janhavi).
-- `check_answer` over-strict on list positions ("ranks 1, 2 and 5"), tool defaults ("30 days") and display sizes (Janhavi).
-- `.github/CODEOWNERS` still has placeholder usernames.
+- `rank_risks` with `dataset=both` and no dates does not record its window, so "30 days" can't be backed (Janhavi).
 
 ---
 History: `V0/V1 code – Sat – server, db, ingest, sql written` · `V2 – Sat – full data loaded and verified`

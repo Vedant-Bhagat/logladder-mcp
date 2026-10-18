@@ -1,4 +1,5 @@
 """core/: limits, timeparse, envelope, receipts, console, context."""
+import json
 import time
 from datetime import datetime
 
@@ -7,7 +8,7 @@ from fakes import FakeDb, assert_valid
 
 from loglad_mcp.core import context as context_mod
 from loglad_mcp.core.console import HttpConsoleClient, make_event, tone_for_level
-from loglad_mcp.core.envelope import digest, error_envelope, make_envelope, make_scope
+from loglad_mcp.core.envelope import canonical_json, digest, error_envelope, make_envelope, make_scope
 from loglad_mcp.core.limits import clamp, truncate_message
 from loglad_mcp.core.receipts import NOT_PERSISTED, ReceiptStore
 from loglad_mcp.core.timeparse import parse_iso, resolve_window
@@ -149,3 +150,10 @@ def test_receipt_store_backs_off_after_db_failure(monkeypatch):
     store._down_until = 0.0
     db.on(r"max\(CAST", [{"n": 1}])  # back, with an older receipt in the table
     assert store.write(_env(), {}) == "R-0003" and len(db.inserts) == n_inserts + 1
+
+
+def test_canonical_json_keeps_pydantic_params_as_objects():
+    from loglad_mcp.tools.display import Annotation
+    a = Annotation(line_id=7, label="first FATAL", tone="critical")
+    assert json.loads(canonical_json({"annotations": [a]})) == {
+        "annotations": [{"label": "first FATAL", "line_id": 7, "tone": "critical"}]}

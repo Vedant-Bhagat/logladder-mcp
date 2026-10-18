@@ -63,8 +63,13 @@ def error_envelope(tool: str, role: str, code: str, message: str, scope: dict | 
     return env
 
 
+def _json_default(o: Any) -> Any:
+    # pydantic params (e.g. show_evidence annotations) must stay objects so receipts can be replayed
+    return o.model_dump() if hasattr(o, "model_dump") else str(o)
+
+
 def canonical_json(obj: Any) -> str:
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"), default=str)
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), default=_json_default)
 
 
 def digest(data: dict) -> str:

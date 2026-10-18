@@ -189,9 +189,12 @@ def grounding_and_selection() -> list[str]:
         out.append(f"| {r['session_id']} | {len(d['claims'])} | {c['backed']} | {c['unbacked']} | {c['mismatched']} | "
                    f"{c['flagged']} | {'yes' if d['ok'] else 'no'} |")
     out += ["", "Runs marked *no* fixed the flagged claims after the check but did not re-run it; each answer says so. "
-            "What remains flagged is mostly checker over-strictness for Janhavi to tune: list positions "
-            "(\"ranks 1, 2, 4 and 5\"), tool defaults (\"30 days\") and display sizes (\"8 largest\"). Real catches "
-            "also happened: E5's first draft gave a midplane count the receipt did not hold, and Claude corrected it."]
+            "Since these runs the checker skips list positions (\"ranks 1, 2, 4 and 5\", \"#3\") and also accepts "
+            "values from the tool's own parameters (\"8 largest\") and the length of the receipt's time window. "
+            "Re-checking the stored final drafts with it clears investigation-rts-panic and T4. M2/M3 keep "
+            "\"30 days\" flagged: `rank_risks` over both datasets with no dates does not record its window, so the "
+            "receipt cannot back it. E5 stays flagged correctly: its first draft gave a midplane count the receipt "
+            "did not hold, and Claude corrected it."]
     sel = runs("tool_selection")
     ok = sum(r["ok"] for r in sel)
     out += ["", "## 5. Tool selection", "",
