@@ -157,7 +157,8 @@ def test_terminal_runs_startup_command_and_input(tmp_path: Path) -> None:
             ws.send_json({"type": "input", "data": "echo TYPED-$((1+1))\r"})
             read_until(ws, "TYPED-2")
             assert client.post("/api/role", json={"role": "engineer"}).json()["typed"] is True
-            read_until(ws, "/mcp__loglad__engineer")  # Ctrl+C, then the command is typed and run
+            read_until(ws, "/clear")
+            read_until(ws, "/mcp__loglad__engineer")  # Ctrl+C, /clear, then the role command is typed and run
             ws.send_json({"type": "input", "data": "exit 0\r"})
             assert wait_for_type(ws, "exit")["code"] == 0
         assert client.get("/api/health").json()["terminal"] == "exited"

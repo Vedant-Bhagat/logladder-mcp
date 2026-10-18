@@ -20,7 +20,9 @@ from .terminal import Terminal
 log = logging.getLogger("loglad.console")
 
 ROLES = ("engineer", "team_lead", "manager")
-ROLE_SWITCH_PAUSE_S = 0.6
+ROLE_SWITCH_PAUSE_S = 0.6   # after Ctrl+C, before typing
+CLEAR_PAUSE_S = 1.0         # after /clear, so Claude has reset before the role prompt arrives
+MENU_PAUSE_S = 0.15         # let Claude's slash-command menu settle before Enter
 MAX_BODY = 2 * 1024 * 1024
 NO_STORE = {"Cache-Control": "no-store"}
 
@@ -76,6 +78,7 @@ def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH, termi
         asyncio.ensure_future(term_hub.broadcast({"type": "exit", "code": code}))
 
     term.on_output, term.on_exit = on_output, on_exit
+    role_lock = asyncio.Lock()
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
@@ -119,6 +122,11 @@ def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH, termi
     async def health() -> JSONResponse:
         return JSONResponse({"ok": True, "panel_clients": len(hub.clients), "terminal": term.status}, headers=NO_STORE)
 
+    async def type_command(command: str) -> None:
+        term.write(command)
+        await asyncio.sleep(MENU_PAUSE_S)
+        term.write("\r")
+
     @app.post("/api/role")
     async def set_role(request: Request) -> JSONResponse:
         try:
@@ -127,17 +135,21 @@ def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH, termi
             return error(400, 'body must be JSON {"role": ...}')
         if role not in ROLES:
             return error(400, f"role must be one of {', '.join(ROLES)}")
+        if role_lock.locked():  # a switch is still being typed; a second Ctrl+C now could quit Claude
+            return error(409, "a role switch is already in progress")
         state.role = role
         await hub.broadcast({"kind": "role", "role": role})
-        # Ctrl+C first stops whatever Claude is doing (and clears a half-typed line), then the role command runs.
+        # Each role starts clean: Ctrl+C stops whatever Claude is doing (and clears a half-typed line),
+        # /clear drops the previous role's conversation, then the role prompt runs.
         # Without a running terminal the page copies the command to the clipboard instead.
         typed = term.status == "running"
         if typed:
-            term.write("\x03")
-            await asyncio.sleep(ROLE_SWITCH_PAUSE_S)
-            term.write(f"/mcp__loglad__{role}")
-            await asyncio.sleep(0.15)  # let Claude's slash-command menu settle before Enter
-            term.write("\r")
+            async with role_lock:
+                term.write("\x03")
+                await asyncio.sleep(ROLE_SWITCH_PAUSE_S)
+                await type_command("/clear")
+                await asyncio.sleep(CLEAR_PAUSE_S)
+                await type_command(f"/mcp__loglad__{role}")
         return JSONResponse({"ok": True, "role": role, "typed": typed}, headers=NO_STORE)
 
     @app.post("/api/terminal/restart")

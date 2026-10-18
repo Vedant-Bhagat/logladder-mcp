@@ -43,7 +43,7 @@ const ui = {
 function renderRoles(): void {
   $("roles").innerHTML = ROLES.map(
     (r) =>
-      `<button class="role" data-role="${r.key}" aria-pressed="${ui.role === r.key}" title="${r.label}: stops Claude (Ctrl+C) and runs /mcp__loglad__${r.key}">${icon(ROLE_ICON[r.key])}<span>${r.label}</span></button>`,
+      `<button class="role" data-role="${r.key}" aria-pressed="${ui.role === r.key}" title="${r.label}: stops Claude (Ctrl+C), clears the previous role (/clear) and runs /mcp__loglad__${r.key}">${icon(ROLE_ICON[r.key])}<span>${r.label}</span></button>`,
   ).join("");
 }
 

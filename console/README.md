@@ -26,4 +26,4 @@ Fill the panels without a backend: `python scripts/replay_panel_events.py` from 
 | `LOGLAD_OPEN_BROWSER` | `on` | `off` = don't open the browser |
 | `LOGLAD_PYTHON` | auto | Python used to create the `.venv` on first run |
 
-Role buttons press Ctrl+C in the terminal (stops whatever Claude is doing), then run `/mcp__loglad__<role>`. If the terminal is off, they copy the command to the clipboard. The button left of the logo (or Ctrl/Cmd+Shift+F) hides the terminal so the panels fill the screen.
+Role buttons press Ctrl+C in the terminal (stops whatever Claude is doing), run `/clear` (the new role starts with a fresh conversation, nothing carried over from the previous role), then run `/mcp__loglad__<role>`. If the terminal is off, they copy the command to the clipboard. The button left of the logo (or Ctrl/Cmd+Shift+F) hides the terminal so the panels fill the screen.
