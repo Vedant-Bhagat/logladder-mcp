@@ -64,6 +64,8 @@ n/a.
 1. OK to add `fastapi` and `websockets` to `pyproject.toml` (or keep `console/requirements.txt`)?
 2. Add `console/tests` to pytest `testpaths`, or keep running it separately?
 
+Answered from A1: the terminal-library question is moot now. The Windows failure Vedant found (node-pty@1.0.0 needs build tools, the prebuilt fork has no Node 24 binary) is gone because this branch has no node-pty at all. No venv activation is needed before `claude`, since `.mcp.json` runs `python tasks.py mcp`. `npm audit fix` updated dompurify to 3.4.17, and `ws` is no longer a dependency.
+
 ## 8. Next
 
 A3/A4: polish with real data (bigger text for the projector), demo layout with Windows Terminal + browser side by side, slides.
