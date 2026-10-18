@@ -90,6 +90,14 @@ LogLadder climbs the evidence ladder one rung at a time, and each rung keeps a l
 
 Same data, different altitude. An **engineer** works at the bottom of the ladder, a **team lead** in the middle and a **manager** at the top, and any claim at the top can be drilled down to the exact lines behind it.
 
+## Where SereneDB does the work
+
+Claude never reads the logs directly. Every tool is a SQL query that [SereneDB](https://serenedb.com) runs, and that query is what the receipt stores.
+
+- **Search:** one inverted index per dataset gives phrase, keyword and typo-tolerant search ranked by BM25, plus highlight offsets for the console. A search over all 4.7M BGL lines takes 6–11 ms.
+- **Load:** SereneDB reads our Parquet files directly and assigns episodes with window functions during the insert. The whole SQL load takes about 15 s.
+- **Analysis:** the counts, weekly trends, percentiles and risk inputs are all aggregates computed in the database, so only small results reach Claude.
+
 ## Quick start
 
 You need Python 3.11+, Node 20+, Docker Desktop and [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
