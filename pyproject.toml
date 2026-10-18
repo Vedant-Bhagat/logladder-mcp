@@ -16,6 +16,10 @@ dependencies = [
   "pyarrow==26.0.0",
   "drain3==0.9.11",
   "python-dotenv==1.2.4",
+  # console server (console/loglad_console); mcp already brings starlette, uvicorn, httpx, jsonschema
+  "fastapi==0.128.8",
+  "websockets==15.0.1",
+  "pywinpty==3.1.0; sys_platform == 'win32'",
 ]
 
 [project.optional-dependencies]
@@ -25,7 +29,7 @@ dev = ["pytest==9.1.1", "jsonschema==4.26.0", "ruff==0.17.1"]
 include = ["loglad_mcp*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "console/tests"]
 markers = ["db: needs a running SereneDB with sample data loaded"]
 
 [tool.ruff]

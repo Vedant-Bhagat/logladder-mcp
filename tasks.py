@@ -9,6 +9,10 @@
     check                 contract + unit tests (no DB) and ruff
     smoke                 integration smoke test (needs SereneDB + loaded data)
     validate              validate all contract fixtures
+    investigate           ask Claude Code the worked investigation (scripts/claude_runs.py)
+    tool-selection        ask Claude Code the 15 tool-selection questions
+    export-investigation  write docs/investigation.md from the runs + receipts
+    validation            write docs/validation.md (load, episodes, labels, receipts, grounding, tool selection)
 """
 from __future__ import annotations
 
@@ -52,6 +56,10 @@ COMMANDS = {
     or run(PY, "-m", "ruff", "check", "loglad_mcp", "ingest", "tests", "tasks.py"),
     "smoke": lambda a: run(PY, "-m", "pytest", "-q", "-m", "db", "-rs", "tests/integration", *a),
     "validate": lambda a: run(PY, "scripts/validate_contracts.py"),
+    "investigate": lambda a: run(PY, "scripts/claude_runs.py", "investigation", *a),
+    "tool-selection": lambda a: run(PY, "scripts/claude_runs.py", "tool_selection", *a),
+    "export-investigation": lambda a: run(PY, "scripts/reports.py", "investigation"),
+    "validation": lambda a: run(PY, "scripts/reports.py", "validation"),
 }
 
 if __name__ == "__main__":

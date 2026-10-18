@@ -97,12 +97,40 @@ You need Python 3.11+, Node 20+, Docker Desktop and [Claude Code](https://docs.a
 
 ```bash
 python tasks.py setup            # virtual env + pinned packages
-python tasks.py db               # start SereneDB in Docker
-python tasks.py data --sample    # load the sample logs
+python tasks.py db               # start SereneDB in Docker (Docker Desktop must be running)
+python tasks.py fetch            # download BGL + OpenStack from Loghub/Zenodo (~65 MB, ~800 MB unpacked)
+python tasks.py data             # parse, mine templates, load SereneDB: ~5 minutes, 4.95M lines
 python tasks.py console          # open the console with Claude inside it
 ```
 
-For the full dataset, run `python tasks.py fetch` and then `python tasks.py data`.
+In a hurry? `python tasks.py data --sample` loads 2,000 lines of each log in seconds instead of `fetch` + `data`. Everything works, but the answers are thin.
+
+## Try it
+
+Pick a role in the console (or type `/mcp__loglad__engineer`, `/mcp__loglad__team_lead`, `/mcp__loglad__manager`), then ask:
+
+- **Engineer:** "What happened on midplane R20-M0 in the hour before the first FATAL kernel error on 2005-06-05?"
+- **Team lead:** "Which problems recurred most in the last 4 weeks of BGL, by episodes, per team?"
+- **Manager:** "Across both systems, what are the top 3 risks right now and what should we do about each?"
+- **All three at once:** `/mcp__loglad__investigate Why does BGL keep logging 'rts panic! - stopping execution'?`
+- **The honesty test:** "How much downtime did this cause?" The logs don't record downtime, and Claude says so instead of inventing a number.
+
+## Results
+
+- [`docs/investigation.md`](docs/investigation.md): the worked investigation (`rts panic` on BGL) through all three roles: Claude's answers, every tool call, receipt and SQL.
+- [`docs/validation.md`](docs/validation.md): load integrity, episode sensitivity, label overlap, receipt reproducibility, answer grounding and tool selection, all generated from queries.
+- [`docs/tools.md`](docs/tools.md): the 14 tools, 4 prompts and 4 resources.
+
+Regenerate them with `python tasks.py investigate`, `export-investigation`, `tool-selection` and `validation` (these call Claude Code).
+
+## Known limitations
+
+- Timestamps are as logged; there is no time-zone conversion.
+- Teams and owners are fictional, mapped from components (`ownership` table); 319 BGL lines have a malformed component and count as `Unowned`.
+- The logs record events, not outages: LogLadder will not state downtime, cost or customer impact.
+- `test_hypothesis` measures precedence (lift), not cause.
+- SereneDB crashes on `ORDER BY BM25(...) DESC, <second key>`, so search results are ranked by BM25 alone and equal scores may come back in any order.
+- Run one Claude session at a time: concurrent sessions can hand out the same receipt ids.
 
 ## Run the console
 
