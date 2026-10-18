@@ -1,24 +1,24 @@
-/* LogLadder console — brand ink + violet (brand/logladder-brand-guide.html). Dense, calm, readable from the back of a room. */
+/* LogLadder console — night indigo + violet, shared with docs/index.html and the slides. Dense, calm, readable from the back of a room. */
 :root {
-  --ink: #0e1116;
-  --term: #0b0d11;
-  --surface: #161a21;
-  --raised: #1e232b;
-  --rule: #272c35;
-  --fg: #ecebe6;
-  --soft: #c9cdd3;
-  --muted: #9aa1ab;
-  --faint: #5e6673;
+  --ink: #131126;
+  --term: #0e0c1f;
+  --surface: #1d1a36;
+  --raised: #26224a;
+  --rule: #332f52;
+  --fg: #ecebf5;
+  --soft: #b9b6cf;
+  --muted: #8783a3;
+  --faint: #5d5980;
   --violet: #5b3df5;
-  --accent: #8b78ff;
-  --accent-soft: rgba(139, 120, 255, 0.16);
+  --accent: #b3a6ff;
+  --accent-soft: rgba(179, 166, 255, 0.14);
 
   /* colour language (spec §4.4) */
   --tone-critical: #ff6b5e;
   --tone-error: #f08a4b;
   --tone-warning: #e6b53a;
   --tone-info: #8a9099;
-  --tone-accent: #8b78ff;
+  --tone-accent: #b3a6ff;
   --tone-good: #3cc47c;
 
   --display: "Inter Tight Variable", "Inter Tight", "Inter Variable", system-ui, sans-serif;
@@ -111,7 +111,7 @@ wa-split-panel::part(divider):hover, wa-split-panel::part(divider):focus-visible
 .term-pane { position: relative; height: 100%; min-width: 0; overflow: hidden; background: var(--term); }
 .term-host { position: absolute; inset: 10px 4px 6px 12px; }
 .term-host .xterm-viewport { scrollbar-color: var(--rule) transparent; }
-.term-overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(11, 13, 17, 0.88); z-index: 2; }
+.term-overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(14, 12, 31, 0.88); z-index: 2; }
 .ov { display: grid; justify-items: center; gap: 10px; max-width: 46ch; text-align: center; color: var(--soft); }
 .ov > svg { width: 28px; height: 28px; color: var(--accent); }
 .ov p { margin: 0; }

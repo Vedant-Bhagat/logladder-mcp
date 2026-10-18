@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LogLadder</title>
+<meta name="description" content="An MCP server that lets Claude Code investigate 4.9 million real log lines in SereneDB, and back every number with the query that produced it.">
+<link rel="icon" href="brand/logladder-app-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #131126; --panel: #1d1a36; --rule: #332f52;
+  --text: #ecebf5; --soft: #b9b6cf; --quiet: #8783a3;
+  --violet: #5b3df5; --lilac: #b3a6ff;
+  --paper: #f3f1fa; --paper-ink: #1f1c33; --paper-quiet: #6b6785; --paper-rule: #d8d4e6;
+  --fatal: #ff5d4f; --good: #43c487;
+  --cond: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --gutter: clamp(16px, 5vw, 64px);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--night); }
+body { margin: 0; background: var(--night); color: var(--text); font: 400 1.0625rem/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: var(--lilac); text-underline-offset: .2em; }
+a:focus-visible, .button:focus-visible { outline: 2px solid var(--lilac); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 var(--gutter); }
+h1, h2, h3 { font-family: var(--cond); font-weight: 600; letter-spacing: -.01em; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.6rem, 6.2vw, 4.8rem); line-height: .98; font-weight: 700; text-wrap: wrap; }
+h2 { font-size: clamp(1.9rem, 4vw, 2.75rem); line-height: 1.05; }
+h3 { font-size: 1.35rem; line-height: 1.2; }
+p { margin: 0; max-width: 62ch; }
+
+/* top bar */
+.bar { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+.bar img { height: 30px; display: block; }
+.bar a { font-weight: 500; text-decoration: none; color: var(--soft); }
+.bar a:hover { color: var(--text); }
+
+/* hero: the receipt is the one loud thing on the page */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: clamp(32px, 6vw, 88px); align-items: start; padding: clamp(40px, 8vw, 96px) 0 clamp(56px, 8vw, 112px); }
+.hero .lede { font-size: 1.2rem; color: var(--soft); margin-top: 28px; max-width: 46ch; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; margin-top: 36px; }
+.button { display: inline-block; background: var(--violet); color: #fff; font-weight: 600; text-decoration: none; padding: 13px 22px; border-radius: 6px; }
+.button:hover { background: #6b50ff; }
+.claim { margin-top: 44px; padding-left: 16px; border-left: 3px solid var(--violet); color: var(--soft); max-width: 46ch; }
+.claim q { color: var(--text); quotes: "“" "”"; }
+.chip { font: 500 .8em var(--mono); color: var(--lilac); background: rgba(179,166,255,.12); padding: 1px 6px; border-radius: 4px; white-space: nowrap; }
+
+.slot { position: relative; padding-top: 14px; }
+.slot::before { content: ""; position: absolute; top: 0; left: -8px; right: -8px; height: 14px; border-radius: 7px; background: #0a0918; box-shadow: inset 0 2px 4px rgba(0,0,0,.6); z-index: 2; }
+.slot-clip { overflow: hidden; margin-top: -7px; padding-bottom: 28px; }
+.receipt {
+  background: var(--paper); color: var(--paper-ink); font: 400 .82rem/1.55 var(--mono);
+  padding: 26px 26px 34px; position: relative;
+  --tear: 10px;
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / calc(var(--tear) * 2) 100%;
+          mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / calc(var(--tear) * 2) 100%;
+  animation: print 1.6s cubic-bezier(.3,.7,.2,1) .35s both;
+}
+@keyframes print { from { transform: translateY(-101%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .receipt { animation: none; } }
+.receipt .head { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--cond); font-size: 1.05rem; font-weight: 600; }
+.receipt .head span:last-child { font: 500 1.35rem var(--mono); color: var(--violet); }
+.receipt dl { display: grid; grid-template-columns: 7.5em 1fr; gap: 2px 10px; margin: 16px 0; padding: 14px 0; border-block: 1px dashed var(--paper-rule); }
+.receipt dt { color: var(--paper-quiet); }
+.receipt dd { margin: 0; overflow-wrap: anywhere; }
+.receipt .total { font-weight: 500; }
+.receipt .sql { color: #3d3866; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .76rem; }
+.receipt .sql b { color: var(--violet); font-weight: 500; }
+.receipt .lines { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--paper-rule); }
+.receipt .lines div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.receipt .lines .lv { color: #c8322a; font-weight: 500; }
+.receipt .digest { margin-top: 14px; color: var(--paper-quiet); font-size: .72rem; overflow-wrap: anywhere; }
+
+/* sections */
+section { padding: clamp(56px, 8vw, 104px) 0; border-top: 1px solid var(--rule); }
+.intro { display: grid; gap: 14px; margin-bottom: clamp(32px, 5vw, 56px); }
+.intro p { color: var(--soft); }
+
+/* the ladder: drawn as rails and rungs, top rung = highest altitude */
+.ladder { position: relative; max-width: 860px; padding: 0 28px; }
+.ladder::before, .ladder::after { content: ""; position: absolute; top: -18px; bottom: -18px; width: 6px; border-radius: 3px; background: var(--rule); }
+.ladder::before { left: 0; } .ladder::after { right: 0; }
+.rung { position: relative; display: grid; grid-template-columns: 9.5rem 10rem minmax(0, 1fr); gap: 4px 28px; align-items: baseline; padding: 22px 0; }
+.rung + .rung { border-top: 6px solid var(--rule); }
+.rung .count { font: 600 1.9rem/1 var(--cond); color: var(--text); font-variant-numeric: tabular-nums; }
+.rung h3 { color: var(--lilac); }
+.rung p { color: var(--soft); font-size: .98rem; }
+.rung p em { color: var(--text); font-style: normal; font-weight: 500; }
+
+/* three answers */
+.answers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); }
+.answer { display: grid; grid-template-rows: auto auto 1fr; gap: 12px; }
+.answer .who { font-family: var(--cond); font-weight: 600; font-size: 1.15rem; }
+.answer .who span { color: var(--quiet); font-weight: 500; }
+.answer blockquote { margin: 0; padding: 18px 20px; background: var(--panel); border-radius: 4px 14px 14px 14px; color: var(--text); font-size: .98rem; }
+.answer .next { color: var(--soft); font-size: .92rem; }
+
+/* honesty */
+.honest { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(28px, 6vw, 80px); align-items: center; }
+.honest .ask { font: 500 1.1rem var(--mono); color: var(--quiet); margin-bottom: 18px; }
+.honest blockquote { margin: 0; font: 500 clamp(1.5rem, 3vw, 2.1rem)/1.25 var(--cond); color: var(--text); }
+.honest blockquote::before { content: "Claude: "; color: var(--lilac); }
+
+/* numbers */
+.checks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border: 1px solid var(--rule); border-radius: 8px; }
+.check { padding: 24px; }
+.check + .check { border-left: 1px solid var(--rule); }
+.check strong { display: block; font: 700 2.4rem/1 var(--cond); font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+.check span { color: var(--soft); font-size: .95rem; }
+
+/* run */
+.run { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 6vw, 80px); align-items: start; }
+pre.cmd { margin: 0; background: #0a0918; border: 1px solid var(--rule); border-radius: 8px; padding: 20px 22px; font: 400 .9rem/1.9 var(--mono); color: var(--text); overflow-x: auto; }
+pre.cmd i { color: var(--quiet); font-style: normal; }
+.run ul { margin: 18px 0 0; padding-left: 1.1em; color: var(--soft); }
+.run li { margin: 6px 0; }
+
+footer { border-top: 1px solid var(--rule); padding: 32px 0 48px; color: var(--quiet); font-size: .92rem; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: space-between; }
+
+@media (max-width: 900px) {
+  .hero, .honest, .run, .answers { grid-template-columns: minmax(0, 1fr); }
+  .checks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .check:nth-child(3) { border-left: 0; }
+  .check:nth-child(n+3) { border-top: 1px solid var(--rule); }
+  .rung { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .checks { grid-template-columns: 1fr; }
+  .check + .check { border-left: 0; border-top: 1px solid var(--rule); }
+  .receipt { padding: 22px 18px 30px; font-size: .76rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="bar">
+    <img src="brand/logladder-horizontal-white.svg" alt="LogLadder">
+    <a href="https://github.com/Vedant-Bhagat/logladder-mcp">Source on GitHub</a>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1>Ask the logs.<br>Get the receipt.</h1>
+      <p class="lede">LogLadder lets Claude Code investigate 4.9 million real log lines in SereneDB, and backs every number it tells you with the query that produced it.</p>
+      <div class="actions">
+        <a class="button" href="https://github.com/Vedant-Bhagat/logladder-mcp#quick-start">Run it on your machine</a>
+        <a href="https://github.com/Vedant-Bhagat/logladder-mcp/blob/main/docs/investigation.md">Read the worked investigation</a>
+      </div>
+      <p class="claim">Claude wrote: <q>3,983 BGL lines (not episodes) match the phrase ‘rts panic stopping execution’</q> <span class="chip">R-0497</span>. This is that receipt.</p>
+    </div>
+
+    <div class="slot" aria-label="Receipt R-0497">
+      <div class="slot-clip">
+        <div class="receipt">
+          <div class="head"><span>search_logs on BGL</span><span>R-0497</span></div>
+          <dl>
+            <dt>asked by</dt><dd>engineer</dd>
+            <dt>phrase</dt><dd>rts panic stopping execution</dd>
+            <dt>matched</dt><dd class="total">3,983 lines</dd>
+            <dt>shown</dt><dd>10, most relevant first</dd>
+            <dt>runtime</dt><dd>60 ms</dd>
+          </dl>
+          <div class="sql"><b>SELECT</b> count(*) <b>FROM</b> bgl_idx
+<b>WHERE</b> message @@ ts_phrase(
+  'rts panic stopping execution')</div>
+          <div class="lines">
+            <div>12:09:46 R00-M0-N5 <span class="lv">FATAL</span> rts panic! - stopping execution</div>
+            <div>12:09:48 R00-M0-N6 <span class="lv">FATAL</span> rts panic! - stopping execution</div>
+            <div>12:09:50 R00-M0-N9 <span class="lv">FATAL</span> rts panic! - stopping execution</div>
+          </div>
+          <div class="digest">sha256 1a09cf7d752303065f1f8173d2f1…<br>re-run with verify_receipt: identical</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="intro">
+      <h2>One ladder, four altitudes</h2>
+      <p>Raw lines are too many to read and too noisy to count. Each rung groups the one below it, so a manager’s risk can always be walked back down to the exact lines.</p>
+    </div>
+    <div class="ladder">
+      <div class="rung"><span class="count">top 5</span><h3>Risks</h3><p>Scored from frequency, spread, trend, severity and labels, with a stability check. <em>For the manager:</em> what to fix first.</p></div>
+      <div class="rung"><span class="count">190,658</span><h3>Episodes</h3><p>Repeats of one problem in one place, close together, counted once. <em>For the team lead:</em> incidents, not noise.</p></div>
+      <div class="rung"><span class="count">448</span><h3>Templates</h3><p>Message shapes mined with Drain3, owned by a team. <em>For the team lead:</em> what keeps coming back.</p></div>
+      <div class="rung"><span class="count">4,955,783</span><h3>Lines</h3><p>BGL supercomputer and OpenStack logs, full-text indexed in SereneDB. <em>For the engineer:</em> what happened, and just before.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="intro">
+      <h2>Same question, three different answers</h2>
+      <p>“Why does BGL keep logging ‘rts panic! - stopping execution’, and what should we do about it?” Claude answered once per role, with different tools at each altitude. Quoted from the recorded run.</p>
+    </div>
+    <div class="answers">
+      <div class="answer">
+        <div class="who">Engineer <span>lines</span></div>
+        <blockquote>In the 300 s after that line, the panic template (51) appears 284 times, ending at 2005-08-09T12:09:52 <span class="chip">R-0498</span>.</blockquote>
+        <p class="next">Next: test the other link-training variants as precursors.</p>
+      </div>
+      <div class="answer">
+        <div class="who">Team lead <span>episodes</span></div>
+        <blockquote>It shows up every one of the 32 weeks. The peak is 22 episodes in the week of 2005-08-29 <span class="chip">R-0507</span>.</blockquote>
+        <p class="next">Next: HPC Kernel &amp; Runtime adds it to its weekly review.</p>
+      </div>
+      <div class="answer">
+        <div class="who">Manager <span>risks</span></div>
+        <blockquote>rts panic is not in the top 5 risks <span class="chip">R-0512</span>. The #1 risk is the ciod CioStream socket error, owned by HPC Applications Support.</blockquote>
+        <p class="next">Next: put the main effort into the CioStream errors.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap honest">
+    <div class="intro" style="margin:0">
+      <h2>It says what it can’t know</h2>
+      <p>A plain-Python checker compares every number in Claude’s draft with the receipts it cites, and flags words like downtime, cost or customers that no query measured.</p>
+    </div>
+    <div>
+      <p class="ask">&gt; How much downtime and money did the rts panics cost us?</p>
+      <blockquote>I can’t tell you the downtime or money. The BGL logs record how often rts panics happen, not how long anything was down or what it cost.</blockquote>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="intro">
+      <h2>Checked, not claimed</h2>
+      <p>Every figure here comes from <a href="https://github.com/Vedant-Bhagat/logladder-mcp/blob/main/docs/validation.md">the validation report</a>, generated from queries against the full load.</p>
+    </div>
+    <div class="checks">
+      <div class="check"><strong>0</strong><span>lines rejected; both datasets match the brief’s row counts</span></div>
+      <div class="check"><strong>15 / 15</strong><span>scripted questions where Claude picked the expected tools</span></div>
+      <div class="check"><strong>16 / 16</strong><span>investigation receipts that re-run to an identical result</span></div>
+      <div class="check"><strong>14</strong><span>MCP tools, plus 4 prompts and 4 resources</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap run">
+    <div class="intro" style="margin:0">
+      <h2>Run it yourself</h2>
+      <p>Everything runs on your machine: SereneDB in Docker, the MCP server started by your own Claude Code, and an optional console in your browser.</p>
+      <ul>
+        <li>Needs Python 3.11+, Node 20+, Docker Desktop and Claude Code.</li>
+        <li>The full load takes about 5 minutes.</li>
+        <li>Then pick a role and ask, or run <code>/mcp__loglad__investigate</code>.</li>
+      </ul>
+    </div>
+    <pre class="cmd"><i># from the repo root</i>
+python tasks.py setup
+python tasks.py db
+python tasks.py fetch
+python tasks.py data
+python tasks.py console</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Built by Vedant, Janhavi and Ayoub for the SereneDB “Making Sense of Logs” hackathon.</span>
+    <span>Teams and owners in the data are fictional. Logs from Loghub.</span>
+  </div>
+</footer>
+
+</body>
+</html>

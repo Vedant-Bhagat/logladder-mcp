@@ -6,15 +6,14 @@
 </p>
 
 <p align="center">
-  <b>Ask your logs a question. See the proof next to the answer.</b><br>
-  Evidence-first log investigation with Claude Code, for engineers, team leads and managers.
+  <a href="https://vedant-bhagat.github.io/logladder-mcp/"><img src="docs/brand/readme-hero.png" alt="Ask the logs. Get the receipt. A real receipt, R-0497: search_logs on BGL matched 3,983 lines for 'rts panic stopping execution' in 60 ms." width="900"></a>
 </p>
 
 <p align="center">
-  <img alt="Status" src="https://img.shields.io/badge/status-hackathon%20build-5B3DF5?style=flat-square">
+  <a href="docs/investigation.md">Worked investigation</a> &nbsp;|&nbsp; <a href="docs/validation.md">Validation</a> &nbsp;|&nbsp; <a href="docs/slides/index.html">Slides</a> &nbsp;|&nbsp; <a href="docs/tools.md">Tools</a>
 </p>
 
-<p align="center"><sub>BUILT WITH</sub></p>
+<p align="center"><sub>Built with</sub></p>
 
 <table align="center">
   <tr>
@@ -116,6 +115,13 @@ Pick a role in the console (or type `/mcp__loglad__engineer`, `/mcp__loglad__tea
 - **The honesty test:** "How much downtime did this cause?" The logs don't record downtime, and Claude says so instead of inventing a number.
 
 ## Results
+
+| Check | Result |
+| --- | --- |
+| Lines loaded | 4,955,783 (BGL 4,747,963 + OpenStack 207,820), matching the brief, 0 rejected |
+| Tool choice | 15 of 15 scripted questions: Claude called the expected tools |
+| Reproducibility | 16 of 16 investigation receipts re-run to an identical result |
+| Honesty | Asked about downtime and cost, Claude says the logs don't record them |
 
 - [`docs/investigation.md`](docs/investigation.md): the worked investigation (`rts panic` on BGL) through all three roles: Claude's answers, every tool call, receipt and SQL.
 - [`docs/validation.md`](docs/validation.md): load integrity, episode sensitivity, label overlap, receipt reproducibility, answer grounding and tool selection, all generated from queries.

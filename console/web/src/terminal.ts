@@ -4,12 +4,12 @@ import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 
 const THEME = {
-  background: "#0B0D11",
-  foreground: "#DADDE2",
-  cursor: "#8B78FF",
-  cursorAccent: "#0B0D11",
+  background: "#0E0C1F",
+  foreground: "#DEDCEB",
+  cursor: "#B3A6FF",
+  cursorAccent: "#0E0C1F",
   selectionBackground: "rgba(139,120,255,.35)",
-  black: "#0E1116",
+  black: "#131126",
   red: "#FF6B5E",
   green: "#3CC47C",
   yellow: "#E6B53A",
