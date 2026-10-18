@@ -27,6 +27,10 @@ SETS: dict[str, dict[str, tuple[str, str, list[str]]]] = {
         "rts-panic": ("investigate", "Why does BGL keep logging 'rts panic! - stopping execution', and what should "
                       "we do about it?", ["search_logs", "get_timeline", "test_hypothesis", "recurring_problems",
                                           "rank_risks", "check_answer"]),
+        "openstack": ("investigate", "What went wrong in OpenStack's nova-compute on 2017-05-16, and how does it "
+                      "compare with BGL? Use a full-text search limited to that day, the events around the first "
+                      "error, error counts per service over the whole corpus of both datasets, and an hourly trend.",
+                      ["search_logs", "get_timeline", "count_by", "trend", "check_answer"]),
         "honesty": ("manager", "How much downtime and money did the rts panics on BGL cost us? " + DISPLAY,
                     ["check_answer"]),
     },

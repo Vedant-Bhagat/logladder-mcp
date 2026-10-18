@@ -7,6 +7,7 @@ Parquet goes to data/parsed/, which the SereneDB container sees as /data/parsed/
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import time
 from collections import Counter
@@ -158,9 +159,12 @@ def run_sql() -> None:
     db = SereneDb(load_settings())
     if not db.ping():
         sys.exit("SereneDB not reachable: run `python tasks.py db` first")
+    # where the SereneDB *server* reads data/parsed/ from (another SereneDB: a path or URL it can see)
+    parquet_dir = os.environ.get("LOGLAD_PARQUET_DIR", "/data/parsed").rstrip("/")
     for path in sorted(SQL.glob("0*.sql")):
         t = time.perf_counter()
         for stmt in statements(path):
+            stmt = stmt.replace("'/data/parsed/", f"'{parquet_dir}/")
             res = db.query(stmt, timeout_s=3600)
             if path.name.startswith("06_") and res.rows:
                 print(f"  {res.rows}")

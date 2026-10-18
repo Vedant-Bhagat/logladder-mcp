@@ -112,6 +112,29 @@ python tasks.py console          # open the console with Claude inside it
 
 In a hurry? `python tasks.py data --sample` loads 2,000 lines of each log in seconds instead of `fetch` + `data`. Everything works, but the answers are thin.
 
+**Dependencies.** Python packages are pinned in [`pyproject.toml`](pyproject.toml) (`mcp`, `psycopg`, `pyarrow`, `drain3`, `fastapi`, …) and installed by `setup`; the console's JavaScript packages are pinned in [`console/package.json`](console/package.json) and installed on its first run.
+
+### Use an existing SereneDB instead of Docker
+
+Skip `python tasks.py db` and point LogLadder at the instance you were given, in a `.env` file at the repo root (copy [`.env.example`](.env.example)):
+
+```bash
+SERENEDB_DSN=postgresql://<user>:<password>@<host>:<port>/
+LOGLAD_PARQUET_DIR=/path/the/server/can/read   # where that server sees data/parsed/
+```
+
+The loader writes Parquet files to `data/parsed/` and asks SereneDB to read them with `read_parquet`, so the server needs to see that folder: mount or copy it there, and set `LOGLAD_PARQUET_DIR` to its path on the server. Then run `fetch` and `data` as above.
+
+### Connect the MCP server
+
+Claude Code picks up [`.mcp.json`](.mcp.json) when you start `claude` in the repo root; approve the `loglad` server and check it with `/mcp`. Anywhere else, register it once:
+
+```bash
+claude mcp add loglad -- python /path/to/logladder-mcp/tasks.py mcp
+```
+
+The server talks over stdio and reads `SERENEDB_DSN` from `.env`. It exposes 14 tools, the prompts `/mcp__loglad__engineer`, `team_lead`, `manager`, `investigate`, and 4 resources (schema, ownership, answer contract, glossary). Inputs and outputs of every tool: [`docs/tools.md`](docs/tools.md).
+
 ## Try it
 
 Pick a role in the console (or type `/mcp__loglad__engineer`, `/mcp__loglad__team_lead`, `/mcp__loglad__manager`), then ask:
@@ -128,11 +151,13 @@ Pick a role in the console (or type `/mcp__loglad__engineer`, `/mcp__loglad__tea
 | --- | --- |
 | Lines loaded | 4,955,783 (BGL 4,747,963 + OpenStack 207,820), matching the brief, 0 rejected |
 | Tool choice | 15 of 15 scripted questions: Claude called the expected tools |
-| Reproducibility | 16 of 16 investigation receipts re-run to an identical result |
+| Reproducibility | 29 of 29 investigation receipts re-run to an identical result |
 | Honesty | Asked about downtime and cost, Claude says the logs don't record them |
+| Query time | Every tool runs on the full 4.95M lines in under 150 ms (p95 per tool, from the receipts) |
+| Claude cost | Median 52 s and $0.47 per question across 18 recorded `claude -p` runs |
 
-- [`docs/investigation.md`](docs/investigation.md): the worked investigation (`rts panic` on BGL) through all three roles: Claude's answers, every tool call, receipt and SQL.
-- [`docs/validation.md`](docs/validation.md): load integrity, episode sensitivity, label overlap, receipt reproducibility, answer grounding and tool selection, all generated from queries.
+- [`docs/investigation.md`](docs/investigation.md): the worked investigation through all three roles, on BGL (`rts panic`) and OpenStack (nova-compute errors): Claude's answers, every tool call, receipt, data scope, truncation and SQL.
+- [`docs/validation.md`](docs/validation.md): load integrity, episode sensitivity, label overlap, receipt reproducibility, answer grounding, tool selection, and query times and cost on the full data, all generated from queries.
 - [`docs/tools.md`](docs/tools.md): the 14 tools, 4 prompts and 4 resources.
 
 Regenerate them with `python tasks.py investigate`, `export-investigation`, `tool-selection` and `validation` (these call Claude Code).

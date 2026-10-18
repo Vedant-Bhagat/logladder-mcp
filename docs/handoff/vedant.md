@@ -95,7 +95,7 @@ data --sample (parse)  ->  bgl: 2,000 rows, 106 templates, 0 rejects · openstac
 - Console deps (`fastapi`, `websockets`, `pywinpty`) moved to `pyproject.toml`; `console/tests` in `testpaths`.
 - `scripts/claude_runs.py` drives real Claude Code (`claude -p`) and records tool calls; `scripts/reports.py` writes
   `docs/investigation.md` and `docs/validation.md`. Commands: `tasks.py investigate | tool-selection | export-investigation | validation`.
-- Results: 15/15 tool-selection questions on the expected path; 16/16 investigation receipts reproduce; honesty question
+- Results: 15/15 tool-selection questions on the expected path; 29/29 investigation receipts reproduce (BGL + OpenStack runs); honesty question
   answered "the logs don't record downtime".
 - Clean checkout (fresh clone + fresh `.venv`): `setup` 2 m 19 s, `check` 117 passed, console builds and serves, MCP lists 14/4/4.
 - Slides: real-data console screenshot and Results card. `docs/demo.md`: 5-minute cue card.
