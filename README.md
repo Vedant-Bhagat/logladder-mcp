@@ -1,8 +1,9 @@
 <p align="center">
-  <img src="docs/brand/logladder-app-icon.svg" alt="LogLadder" width="110">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logladder-horizontal-reversed.svg">
+    <img src="docs/brand/logladder-horizontal.svg" alt="LogLadder" width="380">
+  </picture>
 </p>
-
-<h1 align="center">LogLadder</h1>
 
 <p align="center">
   <b>Ask your logs a question. See the proof next to the answer.</b><br>
