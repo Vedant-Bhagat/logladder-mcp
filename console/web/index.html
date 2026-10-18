@@ -8,6 +8,7 @@
   </head>
   <body>
     <header class="bar">
+      <button class="icon-btn" id="termToggle" aria-pressed="true"></button>
       <div class="brand">
         <svg viewBox="0 0 256 256" aria-hidden="true"><path fill="#F6F5F1" d="M40 40h56v26H66v124h30v26H40z M216 40h-56v26h30v124h-30v26h56z M102 116h36a12 12 0 0 1 0 24h-36a12 12 0 0 1 0-24z M102 154h64a12 12 0 0 1 0 24h-64a12 12 0 0 1 0-24z"/><path fill="#8B78FF" d="M90 90a12 12 0 1 0 24 0a12 12 0 1 0-24 0z"/></svg>
         <span>LogLadder</span>
@@ -56,6 +57,7 @@
 
     <wa-drawer id="drawer" placement="end" light-dismiss></wa-drawer>
     <div class="tooltip-float" id="chartTip" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

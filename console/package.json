@@ -3,16 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "LogLadder console: Claude Code terminal + evidence and explainer panels",
+  "description": "LogLadder console: evidence and explainer panels (FastAPI server + Vite page)",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "dev": "tsx watch --clear-screen=false server/index.ts --dev",
-    "build": "vite build && tsc -p tsconfig.server.json",
-    "start": "node dist/server/index.js",
+    "dev": "node start.mjs --dev",
+    "build": "vite build",
+    "start": "node start.mjs",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@awesome.me/webawesome": "^3.0.0",
@@ -21,20 +21,12 @@
     "@fontsource/jetbrains-mono": "^5.2.5",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
-    "ajv": "^8.17.1",
     "dompurify": "^3.2.6",
     "lucide": "^0.511.0",
-    "marked": "^15.0.12",
-    "ws": "^8.18.3"
-  },
-  "optionalDependencies": {
-    "@homebridge/node-pty-prebuilt-multiarch": "^0.12.0",
-    "node-pty": "^1.0.0"
+    "marked": "^15.0.12"
   },
   "devDependencies": {
     "@types/node": "^22.15.30",
-    "@types/ws": "^8.18.1",
-    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vitest": "^3.2.4"

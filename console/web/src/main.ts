@@ -43,7 +43,7 @@ const ui = {
 function renderRoles(): void {
   $("roles").innerHTML = ROLES.map(
     (r) =>
-      `<button class="role" data-role="${r.key}" aria-pressed="${ui.role === r.key}" title="${r.label}: types /mcp__loglad__${r.key} into Claude (press Enter to run)">${icon(ROLE_ICON[r.key])}<span>${r.label}</span></button>`,
+      `<button class="role" data-role="${r.key}" aria-pressed="${ui.role === r.key}" title="${r.label}: stops Claude (Ctrl+C), clears the previous role (/clear) and runs /mcp__loglad__${r.key}">${icon(ROLE_ICON[r.key])}<span>${r.label}</span></button>`,
   ).join("");
 }
 
@@ -276,7 +276,30 @@ function connectPanels(retry = 500): void {
 
 /* ---------- terminal ---------- */
 
+let termState: TerminalState = "disabled";
+
+let toastTimer = 0;
+function toast(html: string): void {
+  const t = $("toast");
+  t.innerHTML = html;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => (t.hidden = true), 3200);
+}
+
+/** Terminal not running in the page: copy the role command so it can be pasted into Claude elsewhere. */
+async function copyRoleCommand(role: Role): Promise<void> {
+  const cmd = `/mcp__loglad__${role}`;
+  try {
+    await navigator.clipboard.writeText(cmd);
+    toast(`${icon(ROLE_ICON[role])}<span>Copied <code>${esc(cmd)}</code> — paste it into Claude</span>`);
+  } catch {
+    toast(`${icon(ROLE_ICON[role])}<span>Type <code>${esc(cmd)}</code> in Claude</span>`);
+  }
+}
+
 function terminalState(s: TerminalState, reason?: string): void {
+  termState = s;
   const overlay = $("termOverlay");
   if (s === "running") {
     overlay.hidden = true;
@@ -304,7 +327,10 @@ document.addEventListener("click", (e) => {
   if (role) {
     ui.role = role.dataset.role as Role;
     renderRoles();
-    fetch("/api/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: ui.role }) }).finally(() => term.focus());
+    if (termState !== "running") copyRoleCommand(ui.role);
+    fetch("/api/role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: ui.role }) })
+      .catch(() => {})
+      .finally(() => term.focus());
     return;
   }
   const dot = t.closest<HTMLElement>(".dot[data-i]");
@@ -373,22 +399,38 @@ $("evBody").addEventListener("mouseleave", () => {
 });
 new ResizeObserver(() => drawTrend()).observe($("evBody"));
 
-// Presenter shortcut: Ctrl+Shift+F hides/shows the terminal so the panels fill the screen.
+// Show/hide the terminal (button left of the logo, or Ctrl/Cmd+Shift+F) so the panels can fill the screen.
 let savedSplit = 58;
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "f") {
-    e.preventDefault();
-    const split = $("mainSplit") as HTMLElement & { position: number };
-    if (split.position > 1) {
-      savedSplit = split.position;
-      split.position = 0;
-    } else split.position = savedSplit;
-  }
-});
+function setTerminalVisible(visible: boolean): void {
+  const split = $("mainSplit") as HTMLElement & { position: number };
+  if (!visible && split.position > 1) savedSplit = split.position;
+  split.position = visible ? savedSplit : 0;
+  const btn = $("termToggle");
+  btn.setAttribute("aria-pressed", String(visible));
+  btn.title = visible ? "Hide the terminal (Ctrl+Shift+F)" : "Show the terminal (Ctrl+Shift+F)";
+  btn.setAttribute("aria-label", btn.title);
+  btn.innerHTML = icon(visible ? "hideTerm" : "showTerm");
+  if (visible) setTimeout(() => term.fit(), 50);
+}
+const terminalVisible = () => ($("mainSplit") as HTMLElement & { position: number }).position > 1;
+$("termToggle").onclick = () => setTerminalVisible(!terminalVisible());
+// Capture phase, so the shortcut still works while the terminal has focus.
+window.addEventListener(
+  "keydown",
+  (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "f") {
+      e.preventDefault();
+      e.stopPropagation();
+      setTerminalVisible(!terminalVisible());
+    }
+  },
+  true,
+);
 
 renderRoles();
 renderHeader();
 renderEvidence();
 renderExplainer();
 const term = mountTerminal($("termHost"), terminalState, `${wsBase}/ws/terminal`);
+setTerminalVisible(true);
 connectPanels();
