@@ -105,8 +105,10 @@ def search_logs(
         frm, to = w.frm, w.to
     idx = INDEX[ds]
     cond = " AND ".join(where)
+    # BM25 must be the only sort key: `ORDER BY BM25(..) DESC, ts` segfaults SereneDB on the full data.
+    # shortcut: lines with equal scores may come back in any order, upgrade when SereneDB fixes multi-key BM25 sorts.
     rows = q(f"SELECT {LINE_COLUMNS[ds]}, ts_offsets({idx}.message) AS offsets FROM {idx} WHERE {cond} "
-             f"ORDER BY BM25({idx}.tableoid) DESC, ts LIMIT %s", params + [limit])
+             f"ORDER BY BM25({idx}.tableoid) DESC LIMIT %s", params + [limit])
     total = to_int(q(f"SELECT count(*) AS n FROM {idx} WHERE {cond}", params)[0]["n"])
     lines = [log_line(ds, r) for r in rows]
     truncated = total > len(lines)

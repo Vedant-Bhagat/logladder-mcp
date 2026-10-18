@@ -32,8 +32,8 @@ def _describe_one(q: Sql, ds: str, owners: dict) -> tuple[dict, int]:
     table, comp = EVENTS[ds], COMPONENT_COL[ds]
     head = q(f"SELECT count(*) AS n, min(ts) AS lo, max(ts) AS hi, "
              f"sum(CASE WHEN {LABELLED[ds]} THEN 1 ELSE 0 END) AS labelled FROM {table}")[0]
-    comps = q(f"SELECT {comp} AS name, count(*) AS n FROM {table} GROUP BY {comp} ORDER BY n DESC")
-    levels = q(f"SELECT level AS name, count(*) AS n FROM {table} GROUP BY level ORDER BY n DESC")
+    comps = q(f"SELECT {comp} AS name, count(*) AS n FROM {table} GROUP BY {comp} ORDER BY n DESC, name")
+    levels = q(f"SELECT level AS name, count(*) AS n FROM {table} GROUP BY level ORDER BY n DESC, name")
     templates = q("SELECT count(*) AS n FROM templates WHERE dataset = %s", (ds,))[0]["n"]
     episodes = q("SELECT count(*) AS n FROM episodes WHERE dataset = %s", (ds,))[0]["n"]
     components, unmapped = [], 0

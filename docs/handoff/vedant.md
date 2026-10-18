@@ -64,6 +64,9 @@ data --sample (parse)  ->  bgl: 2,000 rows, 106 templates, 0 rejects · openstac
 - All of these work with `%s` parameters: `message @@ ts_phrase(%s)`, `@@ plainto_tsquery(%s)`, bare `message @@ %s`,
   `(ts_levenshtein(%s, 1) && ts_levenshtein(%s, 1))`, verbatim `level @@ %s` / `component @@ %s` / `request_id @@ %s`.
 - `ORDER BY BM25(bgl_idx.tableoid) DESC` works. `EXPLAIN` on an `@@` query over `bgl_idx` shows `IRESEARCH_SCAN`.
+- **BM25 must be the only sort key.** `ORDER BY BM25(idx.tableoid) DESC, ts` (or `, id`, or a BM25 alias plus a second key)
+  segfaults SereneDB on the full data, or returns garbled bytes; the container restarts. BM25 alone passed 90+ runs.
+  Equal scores come back in varying order. Sorting by a second key outside a BM25-only subquery is also safe.
 - `date_trunc('week', ts)` starts weeks on Monday. `quantile_cont(latency_s, 0.95)` works.
 - `count(*)` / `sum(...)` come back as `Decimal` from psycopg for some aggregates; cast to int/float before putting them in envelopes.
 - Auth: `postgres` is only trusted on real loopback; Docker port-forwarding isn't, so compose sets `POSTGRES_PASSWORD=loglad`.
