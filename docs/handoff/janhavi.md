@@ -1,6 +1,6 @@
 # Handoff — Janhavi — J1–J3 done, J4 partly (tool-selection runs pending) — Sun
 
-Branch: `janhavi/tools` (to be created — this work was done on an unpacked copy of `main`, not a git checkout) · Rebased on `main` at: `69c7df4` (zip of main) · Contract version: `1`
+Branch: `janhavi/tools` · Rebased on `main` at: `69c7df4` · Contract version: `1`
 
 ## 1. Done
 
