@@ -20,6 +20,7 @@ from .terminal import Terminal
 log = logging.getLogger("loglad.console")
 
 ROLES = ("engineer", "team_lead", "manager")
+ROLE_SWITCH_PAUSE_S = 0.6
 MAX_BODY = 2 * 1024 * 1024
 NO_STORE = {"Cache-Control": "no-store"}
 
@@ -128,11 +129,15 @@ def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH, termi
             return error(400, f"role must be one of {', '.join(ROLES)}")
         state.role = role
         await hub.broadcast({"kind": "role", "role": role})
-        # Typed without Enter: Claude may be mid-answer, the presenter presses Enter.
+        # Ctrl+C first stops whatever Claude is doing (and clears a half-typed line), then the role command runs.
         # Without a running terminal the page copies the command to the clipboard instead.
         typed = term.status == "running"
         if typed:
+            term.write("\x03")
+            await asyncio.sleep(ROLE_SWITCH_PAUSE_S)
             term.write(f"/mcp__loglad__{role}")
+            await asyncio.sleep(0.15)  # let Claude's slash-command menu settle before Enter
+            term.write("\r")
         return JSONResponse({"ok": True, "role": role, "typed": typed}, headers=NO_STORE)
 
     @app.post("/api/terminal/restart")

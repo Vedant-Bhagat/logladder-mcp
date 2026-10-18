@@ -67,6 +67,9 @@ wa-drawer { position: fixed; }
   height: 48px; padding: 0 12px;
   background: var(--ink); border-bottom: 1px solid var(--rule);
 }
+.icon-btn { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--rule); border-radius: 7px; background: var(--surface); color: var(--muted); cursor: pointer; font-size: 16px; }
+.icon-btn:hover { color: var(--fg); border-color: var(--accent); }
+.icon-btn[aria-pressed="false"] { color: var(--accent); background: var(--accent-soft); }
 .brand { display: flex; align-items: center; gap: 8px; font: 700 15px var(--display); letter-spacing: -0.01em; }
 .brand svg { width: 22px; height: 22px; }
 .roles { display: flex; gap: 2px; padding: 3px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; }
@@ -105,7 +108,7 @@ wa-split-panel::part(divider) { background: var(--rule); }
 wa-split-panel::part(panel) { min-height: 0; overflow: hidden; }
 wa-split-panel::part(divider):hover, wa-split-panel::part(divider):focus-visible { background: var(--accent); }
 
-.term-pane { position: relative; height: 100%; min-width: 0; background: var(--term); }
+.term-pane { position: relative; height: 100%; min-width: 0; overflow: hidden; background: var(--term); }
 .term-host { position: absolute; inset: 10px 4px 6px 12px; }
 .term-host .xterm-viewport { scrollbar-color: var(--rule) transparent; }
 .term-overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(11, 13, 17, 0.88); z-index: 2; }
