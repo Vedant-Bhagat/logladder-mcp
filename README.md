@@ -1,6 +1,6 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logladder-horizontal-reversed.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logladder-horizontal-white.svg">
     <img src="docs/brand/logladder-horizontal.svg" alt="LogLadder" width="380">
   </picture>
 </p>
