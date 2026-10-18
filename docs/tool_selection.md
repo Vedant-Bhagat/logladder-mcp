@@ -1,8 +1,6 @@
 # Tool selection log (J4)
 
-**Status: question set and expected paths written; the Claude Code runs are NOT done yet.** They need SereneDB
-with data loaded and the `loglad` MCP server connected (`claude` in the repo root, `/mcp` shows `loglad`).
-Fill the "Claude called" column from the real transcript, then record any description change below.
+**Status: run on the full data on 2026-10-18 — 15 of 15 questions took the expected path.** Results, including the tools Claude actually called, are in `docs/validation.md` §5 (re-run with `python tasks.py tool-selection` then `python tasks.py validation`). No description changes were needed.
 
 How to run each question: start a fresh `claude` session, pick the role prompt (`/mcp__loglad__engineer`,
 `/mcp__loglad__team_lead`, `/mcp__loglad__manager` — exact form per Vedant's M2 note), paste the question,
@@ -40,7 +38,7 @@ and copy the tool calls in order. "OK" = Claude's path matches the expected path
 
 ## Description changes made because of this log
 
-None yet — fill in after the runs (what Claude did wrong, which sentence of which description changed).
+None: all 15 questions took the expected path on the first run (docs/validation.md §5).
 
 ## Pre-run review of the descriptions
 

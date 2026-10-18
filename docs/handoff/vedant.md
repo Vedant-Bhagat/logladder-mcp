@@ -1,4 +1,4 @@
-# Handoff — Vedant — V0, V1, V2 done — Sat
+# Handoff — Vedant — V0–V4 done (rehearsal + backup video left) — Sun
 
 Branch: `main` · Contract version: `1`
 
@@ -88,9 +88,25 @@ data --sample (parse)  ->  bgl: 2,000 rows, 106 templates, 0 rejects · openstac
 1. Real GitHub usernames for `.github/CODEOWNERS`.
 2. Repo public yet? Teammates invited?
 
-## 8. Next
+## 8. V3 / V4 (Sun)
 
-Merge window W1: review Janhavi's J1 and Ayoub's A1 PRs, then `tasks.py smoke` with real tools.
+- Merged: Ayoub A1, A2 (FastAPI console), README; Janhavi J1–J3. Smoke + `pytest -m db` green on the full data.
+- Fixed: `search_logs` crashed SereneDB (BM25 + second sort key, see §5); `describe_corpus` tie order broke `verify_receipt`.
+- Console deps (`fastapi`, `websockets`, `pywinpty`) moved to `pyproject.toml`; `console/tests` in `testpaths`.
+- `scripts/claude_runs.py` drives real Claude Code (`claude -p`) and records tool calls; `scripts/reports.py` writes
+  `docs/investigation.md` and `docs/validation.md`. Commands: `tasks.py investigate | tool-selection | export-investigation | validation`.
+- Results: 15/15 tool-selection questions on the expected path; 16/16 investigation receipts reproduce; honesty question
+  answered "the logs don't record downtime".
+- Clean checkout (fresh clone + fresh `.venv`): `setup` 2 m 19 s, `check` 117 passed, console builds and serves, MCP lists 14/4/4.
+- Slides: real-data console screenshot and Results card. `docs/demo.md`: 5-minute cue card.
+
+## 9. Still open
+
+- Rehearse the demo twice; record the backup video (people, not code). Run `/login` in Claude Code first: it said the login expires in 3 days.
+- Receipt ids clash when two Claude sessions run at once (`ReceiptStore` reads max id once); README says one session at a time.
+- `show_evidence` receipts store `annotations` as repr strings, so that call can't be replayed from `params_json` (Janhavi).
+- `check_answer` over-strict on list positions ("ranks 1, 2 and 5"), tool defaults ("30 days") and display sizes (Janhavi).
+- `.github/CODEOWNERS` still has placeholder usernames.
 
 ---
 History: `V0/V1 code – Sat – server, db, ingest, sql written` · `V2 – Sat – full data loaded and verified`

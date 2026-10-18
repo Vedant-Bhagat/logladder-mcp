@@ -175,7 +175,7 @@ Unknowns: user impact, cost.</div>
   <span class="eyebrow">The console</span>
   <h2>Claude working on the left. <em>The evidence</em> on the right.</h2>
   <div class="shot">
-    <img src="img/console-1920.jpg" alt="LogLadder console: Claude Code terminal on the left, evidence and explainer panels on the right">
+    <img src="img/console-1920.png" alt="LogLadder console: Claude Code terminal on the left, evidence and explainer panels on the right">
     <div class="notes">
       <div><span class="mk">1</span><span>The real Claude Code CLI, inside the page.</span></div>
       <div><span class="mk">2</span><span>Role buttons: stop, clear, switch role in one click.</span></div>
@@ -184,7 +184,7 @@ Unknowns: user impact, cost.</div>
       <div><span class="mk">5</span><span>Trust shield: amber until every claim is backed.</span></div>
     </div>
   </div>
-  <div class="foot"><span>Screenshot with sample events (fake numbers)</span><span>7 / 8</span></div>
+  <div class="foot"><span>Real data: the worked investigation, engineer view (receipts R-0497 to R-0503)</span><span>7 / 8</span></div>
 </section>
 
 <!-- 8 · Results & limits -->
@@ -194,13 +194,19 @@ Unknowns: user impact, cost.</div>
   <div class="grid g2">
     <div class="card">
       <span class="k">Results</span>
-      <div class="tbd">To fill from the worked investigation (docs/investigation.md) and docs/validation.md: issue picked, episodes vs lines, top risk and its stability, receipts re-run with verify_receipt.</div>
+      <ul>
+        <li><b>4,955,783</b> lines loaded, counts match the brief, 0 rejected.</li>
+        <li><b>rts panic</b>: 3,983 lines, only 300 episodes, steady not growing.</li>
+        <li><b>15 / 15</b> questions: Claude picked the expected tools.</li>
+        <li><b>16 / 16</b> receipts re-run: identical.</li>
+        <li><b>Downtime?</b> “The logs don’t record it.”</li>
+      </ul>
     </div>
     <div class="card">
       <span class="k">Limits we state openly</span>
       <ul>
         <li>Team ownership is fictional (documented).</li>
-        <li>Episode gap G is a choice: 10 min BGL, 60 s OpenStack; sensitivity table in the README.</li>
+        <li>Episode gap G is a choice: 10 min BGL, 60 s OpenStack; sensitivity table in docs/validation.md.</li>
         <li>Templates are mined approximately (Drain3).</li>
         <li>BGL is 2005–06, OpenStack 2017: “recent” means each dataset’s own last 30 days.</li>
         <li>No cost, downtime or user impact in the logs, so we never claim it.</li>

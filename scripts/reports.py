@@ -76,9 +76,11 @@ def investigation() -> None:
              "the recorded Claude Code runs (`scripts/claude_runs.py`) and the `receipts` table. "
              "Answers are Claude's text, unedited; every number in them was checked by `check_answer` against "
              "the receipts listed under each answer.", "",
-             "**Why this issue** (design doc §13.1): FATAL kernel message, ranked #1 by `rank_risks` and stable "
-             "under every weight variant, recurs as many separate episodes, one owning team, and has a "
-             "testable precursor.", ""]
+             "**Why this issue** (design doc §13.1): a FATAL kernel message that recurs as many separate episodes, "
+             "has one owning team, and is ranked #1 by `rank_risks` over BGL's default window (its last 30 days), "
+             "stable under every weight variant. Asked about the whole 7-month span, Claude found it is a steady "
+             "background problem outside the top 5 risks and pointed the manager elsewhere; we kept that answer "
+             "as it came, because following the data is the point.", ""]
     for qid, title in (("rts-panic", "One question, three roles (`/mcp__loglad__investigate`)"),
                        ("honesty", "Honesty check: a question the logs can't answer (`/mcp__loglad__manager`)")):
         r = found.get(qid)
@@ -186,6 +188,10 @@ def grounding_and_selection() -> list[str]:
         c = d["counts"]
         out.append(f"| {r['session_id']} | {len(d['claims'])} | {c['backed']} | {c['unbacked']} | {c['mismatched']} | "
                    f"{c['flagged']} | {'yes' if d['ok'] else 'no'} |")
+    out += ["", "Runs marked *no* fixed the flagged claims after the check but did not re-run it; each answer says so. "
+            "What remains flagged is mostly checker over-strictness for Janhavi to tune: list positions "
+            "(\"ranks 1, 2, 4 and 5\"), tool defaults (\"30 days\") and display sizes (\"8 largest\"). Real catches "
+            "also happened: E5's first draft gave a midplane count the receipt did not hold, and Claude corrected it."]
     sel = runs("tool_selection")
     ok = sum(r["ok"] for r in sel)
     out += ["", "## 5. Tool selection", "",
