@@ -1,7 +1,7 @@
 /* LogLadder console — brand ink + violet (brand/logladder-brand-guide.html). Dense, calm, readable from the back of a room. */
 :root {
   --ink: #0e1116;
-  --term: #0b0d11; /* code blocks */
+  --term: #0b0d11;
   --surface: #161a21;
   --raised: #1e232b;
   --rule: #272c35;
@@ -99,11 +99,20 @@ wa-tooltip { --max-width: 320px; font-size: 12px; }
 .banner { background: rgba(230, 181, 58, 0.15); color: var(--tone-warning); font-size: 12px; text-align: center; padding: 3px; border-bottom: 1px solid var(--rule); }
 
 /* ---------- layout ---------- */
-wa-split-panel.main { height: 100%; min-height: 0; grid-template-columns: minmax(0, 1fr); --min: 140px; --max: calc(100% - 100px); --divider-width: 1px; }
+wa-split-panel.main { height: 100%; min-height: 0; grid-template-rows: minmax(0, 1fr); --min: 0px; --max: calc(100% - 340px); --divider-width: 1px; }
+wa-split-panel.side { grid-template-columns: minmax(0, 1fr); min-height: 0; --min: 120px; --max: calc(100% - 90px); --divider-width: 1px; height: 100%; }
 wa-split-panel::part(divider) { background: var(--rule); }
 wa-split-panel::part(panel) { min-height: 0; overflow: hidden; }
 wa-split-panel::part(divider):hover, wa-split-panel::part(divider):focus-visible { background: var(--accent); }
 
+.term-pane { position: relative; height: 100%; min-width: 0; background: var(--term); }
+.term-host { position: absolute; inset: 10px 4px 6px 12px; }
+.term-host .xterm-viewport { scrollbar-color: var(--rule) transparent; }
+.term-overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(11, 13, 17, 0.88); z-index: 2; }
+.ov { display: grid; justify-items: center; gap: 10px; max-width: 46ch; text-align: center; color: var(--soft); }
+.ov > svg { width: 28px; height: 28px; color: var(--accent); }
+.ov p { margin: 0; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--accent); background: var(--accent-soft); color: var(--fg); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
 
 /* ---------- panels ---------- */
 .panel { display: grid; grid-template-rows: auto 1fr auto; height: 100%; min-height: 0; min-width: 0; background: var(--surface); }

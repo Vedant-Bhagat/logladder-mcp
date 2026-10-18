@@ -1,8 +1,11 @@
-"""HTTP + WebSocket API, frozen in docs/specs/03-ayoub-console.md §3.1 (panels only: no embedded terminal)."""
+"""HTTP + WebSocket API, frozen in docs/specs/03-ayoub-console.md §3.1, plus the embedded terminal (WS /ws/terminal)."""
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +15,7 @@ from jsonschema import Draft202012Validator
 
 from .config import SCHEMA_PATH, WEB_DIST
 from .state import PanelState
+from .terminal import Terminal
 
 log = logging.getLogger("loglad.console")
 
@@ -57,13 +61,31 @@ class Hub:
                 self.clients.discard(ws)
 
 
-def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH) -> FastAPI:
-    app = FastAPI(title="LogLadder console", docs_url=None, redoc_url=None, openapi_url=None)
+def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH, terminal: Terminal | None = None) -> FastAPI:
     validator = make_validator(schema_path)
     state = PanelState()
     hub = Hub()
+    term_hub = Hub()
+    term = terminal or Terminal(enabled=False)
+
+    def on_output(text: str) -> None:
+        asyncio.ensure_future(term_hub.broadcast({"type": "output", "data": text}))
+
+    def on_exit(code: int) -> None:
+        asyncio.ensure_future(term_hub.broadcast({"type": "exit", "code": code}))
+
+    term.on_output, term.on_exit = on_output, on_exit
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        term.start(asyncio.get_running_loop())
+        yield
+        term.stop()
+
+    app = FastAPI(title="LogLadder console", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
     app.state.panel_state = state
     app.state.hub = hub
+    app.state.terminal = term
 
     def error(status: int, *messages: str) -> JSONResponse:
         return JSONResponse({"ok": False, "errors": list(messages)}, status_code=status, headers=NO_STORE)
@@ -94,7 +116,7 @@ def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH) -> Fa
 
     @app.get("/api/health")
     async def health() -> JSONResponse:
-        return JSONResponse({"ok": True, "panel_clients": len(hub.clients), "terminal": "disabled"}, headers=NO_STORE)
+        return JSONResponse({"ok": True, "panel_clients": len(hub.clients), "terminal": term.status}, headers=NO_STORE)
 
     @app.post("/api/role")
     async def set_role(request: Request) -> JSONResponse:
@@ -106,12 +128,48 @@ def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH) -> Fa
             return error(400, f"role must be one of {', '.join(ROLES)}")
         state.role = role
         await hub.broadcast({"kind": "role", "role": role})
-        # No embedded terminal: the page copies /mcp__loglad__<role> for the presenter to paste into Claude.
-        return JSONResponse({"ok": True, "role": role, "typed": False}, headers=NO_STORE)
+        # Typed without Enter: Claude may be mid-answer, the presenter presses Enter.
+        # Without a running terminal the page copies the command to the clipboard instead.
+        typed = term.status == "running"
+        if typed:
+            term.write(f"/mcp__loglad__{role}")
+        return JSONResponse({"ok": True, "role": role, "typed": typed}, headers=NO_STORE)
 
     @app.post("/api/terminal/restart")
     async def restart_terminal() -> JSONResponse:
-        return error(409, "terminal disabled: run claude in your own terminal next to this window")
+        if term.status == "disabled":
+            return error(409, f"terminal disabled: {term.reason}")
+        term.restart()
+        await term_hub.broadcast({"type": "restarted"})
+        return JSONResponse({"ok": True, "terminal": term.status}, headers=NO_STORE)
+
+    @app.websocket("/ws/terminal")
+    async def ws_terminal(ws: WebSocket) -> None:
+        await ws.accept()
+        term_hub.clients.add(ws)
+        try:
+            if term.status == "disabled":
+                await ws.send_text(json.dumps({"type": "disabled", "reason": term.reason}))
+            else:
+                if term.history:
+                    await ws.send_text(json.dumps({"type": "output", "data": term.history}))
+                if term.status == "exited":
+                    await ws.send_text(json.dumps({"type": "exit", "code": None}))
+            while True:
+                try:
+                    msg = json.loads(await ws.receive_text())
+                except ValueError:
+                    continue
+                if not isinstance(msg, dict):
+                    continue
+                if msg.get("type") == "input" and isinstance(msg.get("data"), str):
+                    term.write(msg["data"])
+                elif msg.get("type") == "resize":
+                    term.resize(msg.get("cols"), msg.get("rows"))
+        except WebSocketDisconnect:
+            pass
+        finally:
+            term_hub.clients.discard(ws)
 
     @app.websocket("/ws/panels")
     async def ws_panels(ws: WebSocket) -> None:

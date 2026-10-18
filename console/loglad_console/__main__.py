@@ -15,6 +15,7 @@ except ImportError as e:  # pragma: no cover
 
 from .app import create_app
 from .config import load_dotenv, read_settings
+from .terminal import Terminal
 
 
 def main() -> int:
@@ -23,6 +24,8 @@ def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", stream=sys.stderr)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        if sys.platform != "win32":  # same as uvicorn, so a just-closed console doesn't look busy
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             probe.bind((settings.host, settings.port))
         except OSError as e:
@@ -31,8 +34,9 @@ def main() -> int:
                 return 1
             raise
 
-    print(f"LogLadder console on http://{settings.host}:{settings.port} (run claude in your own terminal)", file=sys.stderr)
-    uvicorn.run(create_app(), host=settings.host, port=settings.port, log_level="warning")
+    terminal = Terminal(enabled=settings.terminal, shell=settings.shell, startup_command=settings.startup_command)
+    print(f"LogLadder console on http://{settings.host}:{settings.port}", file=sys.stderr)
+    uvicorn.run(create_app(terminal=terminal), host=settings.host, port=settings.port, log_level="warning")
     return 0
 
 

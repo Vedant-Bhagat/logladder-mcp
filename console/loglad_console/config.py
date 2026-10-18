@@ -30,6 +30,9 @@ def load_dotenv(path: Path = REPO_ROOT / ".env") -> None:
 class Settings:
     host: str = "127.0.0.1"
     port: int = 7777
+    terminal: bool = True
+    shell: str = ""
+    startup_command: str = "claude"
 
 
 def read_settings(env: dict[str, str] | None = None) -> Settings:
@@ -38,4 +41,10 @@ def read_settings(env: dict[str, str] | None = None) -> Settings:
         port = int(env.get("LOGLAD_CONSOLE_PORT", "") or 7777)
     except ValueError:
         port = 7777
-    return Settings(port=port if port > 0 else 7777)
+    startup = env.get("LOGLAD_STARTUP_COMMAND")  # unset -> claude; set but empty -> nothing
+    return Settings(
+        port=port if port > 0 else 7777,
+        terminal=(env.get("LOGLAD_TERMINAL", "on") or "on").strip().lower() != "off",
+        shell=(env.get("LOGLAD_SHELL") or "").strip(),
+        startup_command="claude" if startup is None else startup.strip(),
+    )

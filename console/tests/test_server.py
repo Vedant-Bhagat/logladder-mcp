@@ -118,3 +118,57 @@ def test_settings_port() -> None:
     assert read_settings({}).port == 7777
     assert read_settings({"LOGLAD_CONSOLE_PORT": "8001"}).port == 8001
     assert read_settings({"LOGLAD_CONSOLE_PORT": "x"}).port == 7777
+
+
+# ---------- embedded terminal (stdlib pty; Windows uses pywinpty and is tested by hand) ----------
+
+posix_only = pytest.mark.skipif(sys.platform == "win32", reason="POSIX pty test")
+
+
+def read_until(ws, marker: str, limit: int = 200) -> str:
+    seen = ""
+    for _ in range(limit):
+        msg = ws.receive_json()
+        if msg.get("type") == "output":
+            seen += msg["data"]
+        if marker in seen:
+            return seen
+    raise AssertionError(f"{marker!r} not seen in terminal output: {seen[-500:]!r}")
+
+
+def wait_for_type(ws, kind: str, limit: int = 200) -> dict:
+    for _ in range(limit):
+        msg = ws.receive_json()
+        if msg.get("type") == kind:
+            return msg
+    raise AssertionError(f"no {kind!r} message")
+
+
+@posix_only
+def test_terminal_runs_startup_command_and_input(tmp_path: Path) -> None:
+    from loglad_console.terminal import Terminal
+
+    term = Terminal(enabled=True, shell="/bin/sh", startup_command="echo LADDER-$((40+2))")
+    with TestClient(create_app(web_root=tmp_path, terminal=term)) as client:
+        assert client.get("/api/health").json()["terminal"] == "running"
+        with client.websocket_connect("/ws/terminal") as ws:
+            read_until(ws, "LADDER-42")  # startup command ran in the shell
+            ws.send_json({"type": "resize", "cols": 100, "rows": 30})
+            ws.send_json({"type": "input", "data": "echo TYPED-$((1+1))\r"})
+            read_until(ws, "TYPED-2")
+            assert client.post("/api/role", json={"role": "engineer"}).json()["typed"] is True
+            read_until(ws, "/mcp__loglad__engineer")  # typed, Enter not pressed
+            ws.send_json({"type": "input", "data": "\x15exit\r"})  # Ctrl+U clears the line, then exit
+            assert wait_for_type(ws, "exit")["code"] == 0
+        assert client.get("/api/health").json()["terminal"] == "exited"
+        assert client.post("/api/terminal/restart").json() == {"ok": True, "terminal": "running"}
+
+
+def test_terminal_off_reports_disabled(tmp_path: Path) -> None:
+    from loglad_console.terminal import Terminal
+
+    with TestClient(create_app(web_root=tmp_path, terminal=Terminal(enabled=False))) as client:
+        with client.websocket_connect("/ws/terminal") as ws:
+            assert ws.receive_json() == {"type": "disabled", "reason": "LOGLAD_TERMINAL=off"}
+        assert client.post("/api/terminal/restart").status_code == 409
+        assert client.post("/api/role", json={"role": "manager"}).json()["typed"] is False
