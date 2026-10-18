@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # make loglad_console importable from the repo root
 
@@ -173,3 +174,14 @@ def test_terminal_off_reports_disabled(tmp_path: Path) -> None:
             assert ws.receive_json() == {"type": "disabled", "reason": "LOGLAD_TERMINAL=off"}
         assert client.post("/api/terminal/restart").status_code == 409
         assert client.post("/api/role", json={"role": "manager"}).json()["typed"] is False
+
+
+def test_other_websites_are_rejected(client: TestClient) -> None:
+    evil = {"Origin": "https://evil.example"}
+    assert client.post("/api/panel", json={**fixture("06_status.json"), "event_id": "t-evil-01"}, headers=evil).status_code == 403
+    assert client.post("/api/role", json={"role": "manager"}, headers=evil).status_code == 403
+    with pytest.raises(WebSocketDisconnect), client.websocket_connect("/ws/terminal", headers=evil) as ws:
+        ws.receive_json()
+    local = {"Origin": "http://127.0.0.1:7777"}
+    assert client.post("/api/role", json={"role": "manager"}, headers=local).status_code == 200
+    assert client.get("/api/health", headers=evil).status_code == 200  # reads are harmless

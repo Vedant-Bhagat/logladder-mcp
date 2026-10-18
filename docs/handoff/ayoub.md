@@ -27,10 +27,10 @@ python scripts/replay_panel_events.py   # other terminal: fill the panels with t
 
 ```
 $ pytest console/tests
-19 passed            (all 7 fixtures valid, broken events rejected, 202/400/duplicate,
+20 passed            (all 7 fixtures valid, broken events rejected, 202/400/duplicate,
                       state, 20-event cap, WS snapshot → event → role, health, role, SPA fallback,
                       terminal: startup command runs, typed input, role typed without Enter,
-                      exit → restart, LOGLAD_TERMINAL=off)
+                      exit → restart, LOGLAD_TERMINAL=off, other-website Origin rejected)
 $ cd console && npm test
 Tests  12 passed     (highlight escaping, number formatting, labels)
 $ pytest tests/contract
@@ -52,6 +52,10 @@ Checked in the browser at 1366×768: typed `echo hello from the console` into th
 ## 5. SereneDB notes (backend only)
 
 n/a.
+
+## 5b. Security
+
+The terminal is a real shell, so the server rejects requests and WebSockets whose `Origin` is another website (403 / close 1008). Without that, any page open in the presenter's browser could type into the shell or post fake evidence. Scripts (the MCP display tools, `replay_panel_events.py`) send no `Origin` and are unaffected; GETs stay open. Server still binds to 127.0.0.1 only.
 
 ## 6. Known issues
 

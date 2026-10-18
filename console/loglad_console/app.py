@@ -8,6 +8,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
@@ -42,6 +43,20 @@ def schema_errors(validator: Draft202012Validator, event: Any) -> list[str]:
     return list(dict.fromkeys(errors))
 
 
+LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+def is_local_origin(origin: str | None) -> bool:
+    """Requests from our own page or from scripts (no Origin) are allowed; another website in the browser is not.
+
+    Without this, any page open in the presenter's browser could talk to ws://127.0.0.1:7777/ws/terminal
+    and type into the shell, or post fake evidence.
+    """
+    if not origin:
+        return True
+    return urlsplit(origin).hostname in LOCAL_HOSTS
+
+
 def _summary(event: dict[str, Any]) -> str:
     payload = event.get("payload") or {}
     receipt = payload.get("receipt") or {}
@@ -71,22 +86,37 @@ def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH, termi
     term_hub = Hub()
     term = terminal or Terminal(enabled=False)
 
+    # One queue and one sender keep terminal output in order (a task per chunk could reorder sends).
+    term_out: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
+
     def on_output(text: str) -> None:
-        asyncio.ensure_future(term_hub.broadcast({"type": "output", "data": text}))
+        term_out.put_nowait({"type": "output", "data": text})
 
     def on_exit(code: int) -> None:
-        asyncio.ensure_future(term_hub.broadcast({"type": "exit", "code": code}))
+        term_out.put_nowait({"type": "exit", "code": code})
+
+    async def send_terminal_output() -> None:
+        while True:
+            await term_hub.broadcast(await term_out.get())
 
     term.on_output, term.on_exit = on_output, on_exit
     role_lock = asyncio.Lock()
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        sender = asyncio.create_task(send_terminal_output())
         term.start(asyncio.get_running_loop())
         yield
         term.stop()
+        sender.cancel()
 
     app = FastAPI(title="LogLadder console", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
+
+    @app.middleware("http")
+    async def reject_foreign_origins(request: Request, call_next: Any) -> Response:
+        if request.method != "GET" and not is_local_origin(request.headers.get("origin")):
+            return JSONResponse({"ok": False, "errors": ["requests from other websites are not allowed"]}, status_code=403)
+        return await call_next(request)
     app.state.panel_state = state
     app.state.hub = hub
     app.state.terminal = term
@@ -162,6 +192,9 @@ def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH, termi
 
     @app.websocket("/ws/terminal")
     async def ws_terminal(ws: WebSocket) -> None:
+        if not is_local_origin(ws.headers.get("origin")):
+            await ws.close(code=1008)
+            return
         await ws.accept()
         term_hub.clients.add(ws)
         try:
@@ -190,6 +223,9 @@ def create_app(web_root: Path = WEB_DIST, schema_path: Path = SCHEMA_PATH, termi
 
     @app.websocket("/ws/panels")
     async def ws_panels(ws: WebSocket) -> None:
+        if not is_local_origin(ws.headers.get("origin")):
+            await ws.close(code=1008)
+            return
         await ws.accept()
         hub.clients.add(ws)
         try:
