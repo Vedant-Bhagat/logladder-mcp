@@ -38,7 +38,7 @@ export function mountTerminal(host: HTMLElement, onState: (s: TerminalState, rea
   const term = new Terminal({
     theme: THEME,
     fontFamily: '"JetBrains Mono", ui-monospace, Consolas, monospace',
-    fontSize: 13,
+    fontSize: window.innerWidth >= 1700 ? 16 : 13, // bigger on a 1920-wide projector
     lineHeight: 1.25,
     cursorBlink: true,
     scrollback: 5000,

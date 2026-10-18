@@ -43,6 +43,11 @@ $ python scripts/replay_panel_events.py
 
 Checked in the browser at 1366×768: typed `echo hello from the console` into the page's terminal and got the output (`docs/handoff/img/a2-fastapi-terminal-1366.jpg`); panels update live over `/ws/panels`.
 
+## 3b. Polish and slides (A4, first pass)
+
+- **Projector size:** at 1700 px wide and up (1920×1080 projector) the header, panels, drawer and tooltips are scaled ×1.22 and the terminal font goes from 13 to 16 px.
+- **Slides:** `docs/slides/index.html`, one self-contained HTML file (open it in a browser; ← → to move, F for full screen; no network). 8 slides: title, problem, idea (ladder + receipt), architecture, three roles, honesty moment, the console (`docs/slides/img/console-1920.jpg`), results and limits. The **Results** box is a placeholder to fill from `docs/investigation.md` / `docs/validation.md` once Vedant's worked investigation exists; no fixture numbers are presented as findings. The console screenshot should be retaken with real data before the demo.
+
 ## 4. Deviations from the spec
 
 - **Server is Python/FastAPI, not Node** (Ayoub's decision). API paths, status codes and message shapes unchanged, so the display tools and the smoke test are unaffected.
@@ -75,4 +80,4 @@ Answered from A1: the terminal-library question is moot now. The Windows failure
 Windows checkpoint, then A3/A4: polish with real data (bigger text for the projector), slides.
 
 ---
-History (one line per milestone): `A1 – Sat 16:10 – Node server + 3 panels + all 7 fixtures; terminal groundwork` · `A2 – Sat 22:00 – server rewritten in FastAPI, panels only` · `A2 – Sun 02:00 – terminal back inside the page (pywinpty / pty)` · `A2 – Sun 03:00 – terminal toggle button, Ctrl+C role switch, one-command run`
+History (one line per milestone): `A1 – Sat 16:10 – Node server + 3 panels + all 7 fixtures; terminal groundwork` · `A2 – Sat 22:00 – server rewritten in FastAPI, panels only` · `A2 – Sun 02:00 – terminal back inside the page (pywinpty / pty)` · `A2 – Sun 03:00 – terminal toggle button, Ctrl+C role switch, one-command run` · `A4 – Sun 03:30 – projector sizing, slide deck (results TBD)`

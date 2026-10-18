@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LogLadder — demo deck</title>
+<!-- Open this file in a browser. ← / → or click to move, F for full screen. Self-contained: no network needed. -->
+<style>
+:root {
+  --ink: #0e1116; --surface: #161a21; --raised: #1e232b; --rule: #272c35;
+  --fg: #ecebe6; --soft: #c9cdd3; --muted: #9aa1ab; --faint: #5e6673;
+  --accent: #8b78ff; --violet: #5b3df5; --accent-soft: rgba(139,120,255,.16);
+  --crit: #ff6b5e; --warn: #e6b53a; --good: #3cc47c;
+  --display: "Inter Tight", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #07080b; color: var(--fg); font-family: var(--body); }
+.deck { height: 100%; display: grid; place-items: center; }
+.slide {
+  display: none; position: relative; overflow: hidden;
+  width: min(100vw, 177.78vh); aspect-ratio: 16 / 9; background: var(--ink);
+  padding: 5.5% 6.5%; font-size: min(1.6vw, 2.85vh);
+}
+.slide.on { display: flex; flex-direction: column; gap: 1.1em; }
+.eyebrow { font: 500 .7em var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+h1, h2 { font-family: var(--display); margin: 0; letter-spacing: -.025em; text-wrap: balance; }
+h1 { font-size: 3.4em; line-height: 1.02; font-weight: 700; }
+h2 { font-size: 2.1em; line-height: 1.08; font-weight: 700; max-width: 26ch; }
+h1 em, h2 em { font-style: normal; color: var(--accent); }
+p { margin: 0; color: var(--soft); line-height: 1.45; max-width: 52ch; }
+.lead { font-size: 1.15em; }
+.foot { position: absolute; left: 6.5%; right: 6.5%; bottom: 4%; display: flex; justify-content: space-between; font: 400 .6em var(--mono); color: var(--faint); }
+.logo { display: flex; align-items: center; gap: .5em; font: 700 1.1em var(--display); }
+.logo svg { width: 1.6em; height: 1.6em; }
+.grid { display: grid; gap: 1em; flex: 1; min-height: 0; }
+.g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: .6em; padding: 1em 1.1em; display: flex; flex-direction: column; gap: .5em; }
+.card b { font: 600 1em var(--display); color: var(--fg); }
+.card p { font-size: .82em; }
+.card .k { font: 500 .62em var(--mono); color: var(--faint); letter-spacing: .08em; text-transform: uppercase; }
+.big { font: 700 2.4em var(--display); color: var(--accent); line-height: 1; }
+.ladder { display: flex; flex-direction: column-reverse; justify-content: center; gap: .5em; }
+.rung { display: grid; grid-template-columns: 2.2em 9em 1fr; align-items: center; gap: .8em; padding: .55em .9em; border-radius: .5em; background: var(--surface); border: 1px solid var(--rule); }
+.rung .n { font: 600 .8em var(--mono); color: var(--accent); }
+.rung b { font: 600 1em var(--display); }
+.rung span { font-size: .8em; color: var(--muted); }
+.flow { display: flex; align-items: stretch; gap: .6em; }
+.flow .card { flex: 1; }
+.arrow { align-self: center; color: var(--faint); font-size: 1.4em; }
+.receipt { font: 400 .72em/1.6 var(--mono); background: #0b0d11; border: 1px solid var(--rule); border-radius: .5em; padding: .9em 1em; color: var(--soft); white-space: pre; overflow: hidden; }
+.receipt .a { color: var(--accent); } .receipt .g { color: var(--good); } .receipt .w { color: var(--warn); } .receipt .c { color: var(--crit); }
+.shot { flex: 1; min-height: 0; display: flex; gap: 1.2em; }
+.shot img { height: 100%; max-width: 70%; object-fit: contain; border-radius: .5em; border: 1px solid var(--rule); }
+.notes { display: flex; flex-direction: column; gap: .7em; font-size: .85em; }
+.notes div { display: flex; gap: .6em; }
+.mk { flex: none; display: inline-grid; place-items: center; width: 1.4em; height: 1.4em; border-radius: 50%; background: var(--accent); color: var(--ink); font: 700 .75em var(--display); }
+ul { margin: 0; padding-left: 1.1em; color: var(--soft); line-height: 1.5; }
+li { margin: .2em 0; }
+.tbd { border: 1px dashed var(--warn); color: var(--warn); border-radius: .5em; padding: .8em 1em; font-size: .8em; }
+.pill { display: inline-flex; align-items: center; gap: .4em; padding: .25em .7em; border-radius: 999px; font: 500 .75em var(--body); }
+.pill.warn { background: rgba(230,181,58,.15); color: var(--warn); } .pill.ok { background: rgba(60,196,124,.15); color: var(--good); }
+.nav { position: fixed; right: 1em; bottom: .8em; font: 400 12px var(--mono); color: var(--faint); }
+@media print { .slide { display: flex !important; page-break-after: always; width: 100vw; } .nav { display: none; } }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- 1 · Title -->
+<section class="slide">
+  <div class="logo"><svg viewBox="0 0 256 256" aria-hidden="true"><path fill="#F6F5F1" d="M40 40h56v26H66v124h30v26H40z M216 40h-56v26h30v124h-30v26h56z M102 116h36a12 12 0 0 1 0 24h-36a12 12 0 0 1 0-24z M102 154h64a12 12 0 0 1 0 24h-64a12 12 0 0 1 0-24z"/><path fill="#8B78FF" d="M90 90a12 12 0 1 0 24 0a12 12 0 1 0-24 0z"/></svg>LogLadder</div>
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:1.2em">
+    <span class="eyebrow">National AI Hackathon 2026 · SereneDB “Making Sense of Logs”</span>
+    <h1>Ask your logs a question.<br><em>See the proof</em> next to the answer.</h1>
+    <p class="lead">An MCP server over SereneDB that lets Claude answer for an engineer, a team lead and a manager, where every number traces back to a query that actually ran.</p>
+  </div>
+  <div class="foot"><span>Vedant · Janhavi · Ayoub</span><span>1 / 8</span></div>
+</section>
+
+<!-- 2 · Problem -->
+<section class="slide">
+  <span class="eyebrow">The problem</span>
+  <h2>Millions of log lines don’t fit in a prompt, and models <em>make numbers up</em>.</h2>
+  <div class="grid g3">
+    <div class="card"><span class="k">Scale</span><span class="big">4.7M</span><p>BGL supercomputer lines, plus 207k OpenStack lines. The agent can only ask focused questions through tools.</p></div>
+    <div class="card"><span class="k">Lines ≠ incidents</span><span class="big">10,000</span><p>matching lines can be three real events. Counting lines misleads every team lead and manager.</p></div>
+    <div class="card"><span class="k">Three people, three questions</span><span class="big">3</span><p>Engineer: what failed? Team lead: what keeps recurring? Manager: what do we fix first?</p></div>
+  </div>
+  <div class="foot"><span>LogLadder</span><span>2 / 8</span></div>
+</section>
+
+<!-- 3 · Idea -->
+<section class="slide">
+  <span class="eyebrow">Our idea</span>
+  <h2>Smart tools, not smart prompts: <em>a ladder</em> and <em>a receipt</em> for every number.</h2>
+  <div class="grid g2">
+    <div class="ladder">
+      <div class="rung"><span class="n">1</span><b>Lines</b><span>raw log entries · engineer</span></div>
+      <div class="rung"><span class="n">2</span><b>Templates</b><span>recurring message shapes · team lead</span></div>
+      <div class="rung"><span class="n">3</span><b>Episodes</b><span>bursts of one problem = incidents</span></div>
+      <div class="rung"><span class="n">4</span><b>Risks</b><span>scored from measured inputs · manager</span></div>
+    </div>
+    <div class="receipt"><span class="a">R-0042</span>  search_logs · bgl
+scope    2005-06-01 → 2005-06-30
+filters  level = FATAL
+result   20 returned of 1,284 · <span class="w">truncated</span>
+runtime  38 ms
+sql      SELECT … FROM bgl_idx
+         WHERE message @@ ts_phrase(…)
+         ORDER BY BM25(…) DESC LIMIT 20
+
+<span class="g">Claude cites [R-0042]; anyone can re-run it.</span></div>
+  </div>
+  <div class="foot"><span>Illustrative receipt</span><span>3 / 8</span></div>
+</section>
+
+<!-- 4 · Architecture -->
+<section class="slide">
+  <span class="eyebrow">Architecture</span>
+  <h2>SereneDB does the search and the maths. Claude does the explaining.</h2>
+  <div class="flow" style="flex:1">
+    <div class="card"><span class="k">Agent</span><b>Claude Code</b><p>Role prompts: /engineer, /team_lead, /manager, /investigate.</p></div>
+    <span class="arrow">→</span>
+    <div class="card"><span class="k">MCP server · Python</span><b>loglad</b><p>12 tools: search, timeline, trace, count, trend, recurring problems, rank risks, test hypothesis, check answer, receipts. Every call stores a receipt.</p></div>
+    <span class="arrow">→</span>
+    <div class="card"><span class="k">Engine</span><b>SereneDB</b><p>Full-text index with BM25, phrase and fuzzy search, window functions for episodes, aggregates.</p></div>
+  </div>
+  <div class="flow">
+    <div class="card" style="border-color:var(--accent)"><span class="k">Console · FastAPI + TypeScript</span><b>Terminal + evidence + explainer</b><p>2 display tools push evidence built only from stored receipts, so the screen can’t show made-up data.</p></div>
+  </div>
+  <div class="foot"><span>LogLadder</span><span>4 / 8</span></div>
+</section>
+
+<!-- 5 · Three roles -->
+<section class="slide">
+  <span class="eyebrow">Three roles, same data</span>
+  <h2>The role changes the <em>rung</em>, the tools and the next step, not just the tone.</h2>
+  <div class="grid g3">
+    <div class="card"><span class="k">Engineer · lines</span><b>What failed, and what happened just before?</b><p>search_logs → get_timeline → test_hypothesis. Highlighted log lines, anchor, precursor tested in SQL.</p><p><b style="font-size:.85em">Next step:</b> a check to run.</p></div>
+    <div class="card"><span class="k">Team lead · templates, episodes</span><b>What keeps recurring, and whose is it?</b><p>recurring_problems → trend by team → count_by. Episodes, not lines, per owning team.</p><p><b style="font-size:.85em">Next step:</b> what to investigate first.</p></div>
+    <div class="card"><span class="k">Manager · risks</span><b>What do we fix first?</b><p>rank_risks: a transparent score from frequency, spread, trend, severity, labels, with rank stability.</p><p><b style="font-size:.85em">Next step:</b> a decision, no invented cost.</p></div>
+  </div>
+  <div class="foot"><span>LogLadder</span><span>5 / 8</span></div>
+</section>
+
+<!-- 6 · Honesty moment -->
+<section class="slide">
+  <span class="eyebrow">The honesty moment</span>
+  <h2>We ask a leading question. The system <em>refuses to invent</em>.</h2>
+  <div class="grid g2">
+    <div class="receipt">&gt; How much downtime did this cause?
+
+check_answer(draft)
+  <span class="c">✗ impact_word  "downtime"   no receipt measures it</span>
+  <span class="g">✓ backed       "312 parity errors"  [R-0002]</span>
+  <span class="g">✓ backed       "lift 13.6"          [R-0007]</span>
+
+<span class="a">Claude:</span> The logs don’t establish downtime.
+What they show: [R-0002], [R-0007].
+Unknowns: user impact, cost.</div>
+    <div class="card" style="justify-content:center; gap:1em">
+      <span class="k">On the console header</span>
+      <div><span class="pill warn">⚠ 1 flagged</span> → <span class="pill ok">✓ all claims backed</span></div>
+      <p>check_answer is plain Python: every number in the draft must match a value in the receipts it cites. Causal words in “Observed” and impact words are flagged.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Illustrative exchange</span><span>6 / 8</span></div>
+</section>
+
+<!-- 7 · Console -->
+<section class="slide">
+  <span class="eyebrow">The console</span>
+  <h2>Claude working on the left. <em>The evidence</em> on the right.</h2>
+  <div class="shot">
+    <img src="img/console-1920.jpg" alt="LogLadder console: Claude Code terminal on the left, evidence and explainer panels on the right">
+    <div class="notes">
+      <div><span class="mk">1</span><span>The real Claude Code CLI, inside the page.</span></div>
+      <div><span class="mk">2</span><span>Role buttons: stop, clear, switch role in one click.</span></div>
+      <div><span class="mk">3</span><span>Evidence: lines, table, trend or risk cards, drawn from receipts only.</span></div>
+      <div><span class="mk">4</span><span>Click any R-chip to see the SQL behind a number.</span></div>
+      <div><span class="mk">5</span><span>Trust shield: amber until every claim is backed.</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>Screenshot with sample events (fake numbers)</span><span>7 / 8</span></div>
+</section>
+
+<!-- 8 · Results & limits -->
+<section class="slide">
+  <span class="eyebrow">Results and limits</span>
+  <h2>What we measured, and what the logs <em>can’t</em> tell us.</h2>
+  <div class="grid g2">
+    <div class="card">
+      <span class="k">Results</span>
+      <div class="tbd">To fill from the worked investigation (docs/investigation.md) and docs/validation.md: issue picked, episodes vs lines, top risk and its stability, receipts re-run with verify_receipt.</div>
+    </div>
+    <div class="card">
+      <span class="k">Limits we state openly</span>
+      <ul>
+        <li>Team ownership is fictional (documented).</li>
+        <li>Episode gap G is a choice: 10 min BGL, 60 s OpenStack; sensitivity table in the README.</li>
+        <li>Templates are mined approximately (Drain3).</li>
+        <li>BGL is 2005–06, OpenStack 2017: “recent” means each dataset’s own last 30 days.</li>
+        <li>No cost, downtime or user impact in the logs, so we never claim it.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>github.com/Vedant-Bhagat/logladder-mcp</span><span>8 / 8</span></div>
+</section>
+
+</div>
+<div class="nav">← → to move · F full screen</div>
+<script>
+const slides = [...document.querySelectorAll(".slide")];
+let i = Math.max(0, Math.min(slides.length - 1, Number(location.hash.slice(1)) - 1 || 0));
+const show = (n) => {
+  i = Math.max(0, Math.min(slides.length - 1, n));
+  slides.forEach((s, k) => s.classList.toggle("on", k === i));
+  history.replaceState(null, "", "#" + (i + 1));
+};
+document.addEventListener("keydown", (e) => {
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) show(i + 1);
+  if (["ArrowLeft", "PageUp"].includes(e.key)) show(i - 1);
+  if (e.key === "Home") show(0);
+  if (e.key === "End") show(slides.length - 1);
+  if (e.key.toLowerCase() === "f") document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+});
+document.addEventListener("click", (e) => show(e.clientX > innerWidth / 3 ? i + 1 : i - 1));
+window.addEventListener("hashchange", () => show(Number(location.hash.slice(1)) - 1 || 0));
+show(i);
+</script>
+</body>
+</html>

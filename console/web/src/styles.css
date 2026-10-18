@@ -282,6 +282,12 @@ wa-drawer h4 { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; fo
 .sql pre { margin: 0; padding: 10px; background: var(--term); font: 400 12px/1.6 var(--mono); color: var(--soft); white-space: pre-wrap; word-break: break-word; }
 .sql .kw { color: var(--accent); }
 
+/* Projector (1920×1080 and up): everything outside the terminal grows ~22% so it reads from the back of the room. */
+@media (min-width: 1700px) {
+  .bar, .panel, .toast, .tooltip-float, wa-drawer { zoom: 1.22; }
+  .bar { height: auto; padding-block: 2px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
