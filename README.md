@@ -12,14 +12,63 @@
 
 <p align="center">
   <img alt="Status" src="https://img.shields.io/badge/status-hackathon%20build-5B3DF5?style=flat-square">
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white">
-  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-console-009688?style=flat-square&logo=fastapi&logoColor=white">
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-UI-3178C6?style=flat-square&logo=typescript&logoColor=white">
-  <img alt="MCP" src="https://img.shields.io/badge/MCP-loglad-0E1116?style=flat-square&logo=modelcontextprotocol&logoColor=white">
-  <img alt="Claude Code" src="https://img.shields.io/badge/Claude%20Code-agent-D97757?style=flat-square&logo=claude&logoColor=white">
-  <img alt="SereneDB" src="https://img.shields.io/badge/SereneDB-data-0E1116?style=flat-square">
-  <img alt="Docker" src="https://img.shields.io/badge/Docker-required-2496ED?style=flat-square&logo=docker&logoColor=white">
 </p>
+
+<p align="center"><sub>BUILT WITH</sub></p>
+
+<table align="center">
+  <tr>
+    <td align="center" width="96">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://cdn.simpleicons.org/python/white">
+        <img src="https://cdn.simpleicons.org/python" width="36" height="36" alt="Python">
+      </picture>
+      <br><sub>Python</sub>
+    </td>
+    <td align="center" width="96">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://cdn.simpleicons.org/fastapi/white">
+        <img src="https://cdn.simpleicons.org/fastapi" width="36" height="36" alt="FastAPI">
+      </picture>
+      <br><sub>FastAPI</sub>
+    </td>
+    <td align="center" width="96">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://cdn.simpleicons.org/typescript/white">
+        <img src="https://cdn.simpleicons.org/typescript" width="36" height="36" alt="TypeScript">
+      </picture>
+      <br><sub>TypeScript</sub>
+    </td>
+    <td align="center" width="96">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://cdn.simpleicons.org/modelcontextprotocol/white">
+        <img src="https://cdn.simpleicons.org/modelcontextprotocol" width="36" height="36" alt="MCP">
+      </picture>
+      <br><sub>MCP</sub>
+    </td>
+    <td align="center" width="96">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://cdn.simpleicons.org/claude/white">
+        <img src="https://cdn.simpleicons.org/claude" width="36" height="36" alt="Claude Code">
+      </picture>
+      <br><sub>Claude Code</sub>
+    </td>
+    <td align="center" width="96">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/brand/serenedb-white.svg">
+        <img src="docs/brand/serenedb-dark.svg" width="36" height="36" alt="SereneDB">
+      </picture>
+      <br><sub>SereneDB</sub>
+    </td>
+    <td align="center" width="96">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://cdn.simpleicons.org/docker/white">
+        <img src="https://cdn.simpleicons.org/docker" width="36" height="36" alt="Docker">
+      </picture>
+      <br><sub>Docker</sub>
+    </td>
+  </tr>
+</table>
 
 <hr>
 
